@@ -1,6 +1,7 @@
 \documentclass[11pt,twoside,a4paper]{article}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{tikz}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -29,15 +30,53 @@
 \date{November 2016}
 \maketitle
 \begin{abstract}
-LedgerLoops is a novel financial technology. Rather than a crypto-currency, it is better viewed as a decentralized protocol for ledger federation. At its core is the concept of {\em cryptographically triggered IOUs}.
+LedgerLoops is a novel financial technology. Rather than a crypto-currency or new form of money, it is better viewed as an alternative to money. At its core is the concept of {\em cryptographically triggered IOUs}.
 
 In this whitepaper, the Whispering Merchants problem serves as a simplified abstraction of economic exchange in general, where assets flow in loops. Traditionally, money would flow in the opposite direction, thus solving the coordination problem by effectively reducing the loop to a chain of one-to-one transactions. But money has a number of downsides, mainly due to the need to trust people other than your direct economical neighbors. Value fluctuations in a currency act as a single point of failure, which can have devastating effects on economic trade. LedgerLoops aims to allow assets to move around, while every trader only needs to trusts their own direct peers.
 
-In the Whispering Merchants problem, merchants sit in a circle, facing outward. Each merchant can only communicate with their two direct neighbors. Each merchant wants to sell an asset to their left neighbor, and buy an asset from their right neighbor. Each merchant only trusts their immediate neighbors, and they trust no one else (thus excluding fiat money as an option), nor are they interested in any other asset than the item offered by their right neighbor (thus excluding commodity money). The problem exists in achieving cooperation between the merchants so that all assets move one merchant to the left.
-
-LedgerLoops is a novel solution to the Whispering Merchants problem, based on cryptographically triggering each local IOU, rather than moving some sort of currency around the circle of merchants.
+LedgerLoops is a novel solution to the Whispering Merchants problem, based on cryptographically triggering each local IOU, rather than moving some sort of currency around the circle of merchants in the opposite direction.
 \end{abstract}
+
+\section{The Whispering Merchants Problem}
+In the Whispering Merchants problem, merchants sit in a circle, facing outward. Each merchant can only communicate with their two direct neighbors in the circle. Each merchant wants to offer an asset to their left neighbor, and obtain an asset from their right neighbor. Each merchant trusts their immediate neighbors to keep any promises they make, but they do not trust anyone else (thus excluding fiat money as an option), nor are they interested in any other asset than the item offered by their right neighbor (thus excluding commodity money). The problem exists in achieving cooperation between the merchants so that all assets move one merchant to the left.
+
+To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitting in a circle, facing outward.
+
+\begin{figure}
+\begin{tikzpicture}
+\draw [fill=brown] (0.5, 0.5) circle [radius=0.2];
+
+\draw[->,red,ultra thick] (0.9,1) --(0.1,1);
+\draw [fill=black] (0,1) circle [radius=0.1];
+\node[above left] at (0,1) {$Abraham$}; 
+
+\draw[->,yellow,ultra thick] (0,0.9) --(0,0.1);
+\draw [fill=black] (0, 0) circle [radius=0.1];
+\node[below left] at (0,0) {$Bethany$};
+
+\draw[->,orange,ultra thick] (0.1,0) --(0.9,0);
+\draw [fill=black] (1,0) circle [radius=0.1];
+\node[below right] at (1,0) {$Chad$};
+
+\draw[->,green,ultra thick] (1,0.1) --(1,0.9);
+\draw [fill=black] (1, 1) circle [radius=0.1];
+\node[above right] at (1,1) {$Dorus$};
+
+% \node[anchor=south] at (1.2, 0.5) {Apple};
+% \node[anchor=east] at (0.5, -0.2) {Banana};
+% \node[anchor=north] at (-0.2, 0.5) {Carrot};
+% \node[anchor=west] at (0.5, 1.2) {Durian};
+\end{tikzpicture}
+\caption{Abraham has a \textbf{\color{yellow} banana} to offer Bethany. Bethany has a \textbf{\color{orange} carrot} for Chad. Chad has a \textbf{\color{green} durian} for Dorus. Dorus, in turn, has an \textbf{\color{red} apple} to offer, in which Abraham is interested.}
+\end{figure}
+
+What makes the Whispering Merchants problem hard is that for instance in this example, Abraham initially has no way of obtaining the apple from Dorus, since he has nothing of interest to offer to Dorus. Abraham also has no knowledge of the existence of Chad, and he does not trust Chad.
+
+The LedgerLoops website (https://ledgerloops.com) contains a discussion of various money systems, none of which satisfy the requirement that each participants only trusts their own immediate neighbors.
+
 \section{Cryptographically Triggered IOUs}
+This whitepaper proposes a solution to the Whispering Merchants problem, called LedgerLoops. It is based on cryptographically triggered IOUs.
+
 An IOU (short for "I owe you") is a message or document representing a debt.
 A cryptographically triggered IOU contains the same data as a standard IOU (debtor, beneficiary, asset owed, etc.), plus a cryptographic challenge.
 
@@ -47,38 +86,40 @@ The Whispering Merchants can use cryptographically triggered IOUs as follows to 
 
 The initiator gives a cryptographically triggered IOU to his left neighbor, for the item he wants to offer. Each next left neighbor does the same. The details of the challenge are reused each time, but the item offered is different in each locally created IOU.
 
-Once the initiator receives a cryptographically triggered IOU from his own right neighbor, for the item he wants to receive, he solves the challenge and presents the solution to his right neighbor. Each next right neighbor now gives they asset they offered in exchange to the solution to the challenge.
+Once the initiator receives a cryptographically triggered IOU from his own right neighbor, for the item he wants to receive, he solves the challenge and presents the solution to his right neighbor. Each next right neighbor now gives they asset they offered in exchange for the solution to the challenge.
 
-Since the challenge used in all cryptographically triggered IOUs was the same one for all trades along the loop, the solution to this challenge acts as a cryptographic coin, which has a well-defined value for each participant, but which loses its value as soon as the loop of trades has been settled.
+Since the challenge used in all cryptographically triggered IOUs was the same one for all trades along the loop, the solution to this challenge acts as a cryptographic trigger, but its meaning is different from the meaning of a cryptographic coin. Therefore, LedgerLoops should be considered an alternative to money, rather than an alternative form of money.
 
-\section{The LedgerLoops Protocol (version 0.5)}
+\section{The LedgerLoops Protocol (version 0.6)}
 In the last few weeks, I have implemented a few design iterations of the LedgerLoops protocol. Future versions are likely to differ from this, but let me describe roughly how it currently works.
 
 \subsection{Peer-to-peer Ledgers}
 As Graeber noted in his book "Debt: the first 5,000 years", peer-to-peer debt is useful for time-skewed barter between two peers; I give you something now, and you give me something in exchange tomorrow; in the meantime, a debt exists. This is why LedgerLoops is based on peer-to-peer ledgers (that is, ledgers on which two people keep track of what they owe each other).
 
 Before finding a loop along which assets can move around, the first step of the algorithm consists of agents building up a ledger with each of their neighbors in the graph, by sending each other standard, unconditional IOUs, of the following format:
-\begin{lstlisting}
+
+\vbox{\begin{lstlisting}
 {
-  protocol: 'local-ledgers-0.1',
+  protocol: 'local-ledgers-0.2',
   msgType: 'initiate-update',
   transactionId: <a unique string>,
   note: <a description of why this IOU is being sent, for instance "you paid for dinner yesterday">,
   debtor: <identifier of the sender; this can be just a first name, as long as it's different from the first name of the recipient>,
   addedDebts: {
-    [currency]: amount, // for instance 'USD': 10,
+    [asset]: amount, // for instance 'USD': 10,
   },
 }
-\end{lstlisting}
+\end{lstlisting}}
 
 Even if the communication network is reliable and would detect network outages without losing any messages, a malfunction in the receiver's software could make it look like this message was received successfully when in fact it was not, so to confirm receipt, the recipient replies with:
-\begin{lstlisting}
+
+\vbox{\begin{lstlisting}
 {
-  protocol: 'local-ledgers-0.1',
+  protocol: 'local-ledgers-0.2',
   msgType: 'confirm-update',
-  transactionId: <a unique string>,
+  transactionId: <same as in initiate-update message it confirms>,
 }
-\end{lstlisting}
+\end{lstlisting}}
 
 So in the current implementation, the exchange of assets is done asynchronously, creating debts on local ledgers, which then get fed into the cycle detection and settlement algorithm. Each participant will be happy if they can exchange one of their incoming debts against one of their outgoing debt, since the balance of each debt will go down, thereby minimizing their exposure to credit risk and enabling new trades to take place.
 
@@ -103,31 +144,27 @@ I adapted this algorithm slightly to make it work in graphs whose topology can c
 
 As a special remedy against race conditions, when an internal node has already been activated, and then gets another positive "I might be part of a cycle" from a neighbor, it does not forward that message (since its state does not change, so there's no news to report). This means that this second message dies at this internal node, and does not get a chance to bounce against the leaf nodes at the edge of the network. The naive solution for this would be to wait for the first message to come back (either bouncing against leaves, or cycling around), but if a cycle is created by adding a lot of new links at almost the same time, a race condition can occure where both messages get suppressed along the way. Therefore, the internal node that suppresses the second message gives back a positive reply in this special case.
 
-The current version of the LedgerLoops protocol is still a very simplified proof-of-concept, and participants in a loop are not yet allowed to negotiate exchange rates for assets; they need to indicate the value of their asset in terms of a unit of value, which is now (confusingly, I admit) called currency. All trades in a Ledger Loop still need to have exactly the same value, expressed in the same unit of value.
-
 A node can send its "I'm not on a cycle" message in error or while lying on purpose - when this happens, this messages more precisely means "I'm not on a cycle of nodes that cooperate correctly".
 
-\begin{lstlisting}
+\vbox{\begin{lstlisting}
 {
-  protocol: 'ddcd-dfs-0.1',
+  protocol: 'ddcd-dfs-0.2',
   msgType: 'update-status',
-  currency: <used as a unit of value here; for instance 'USD'>,
   value: <true if the sending node might be on a cycle, false if it definitely isn't>
   isReply: <true indicates this message is a reply to an earlier message>,
 }
-\end{lstlisting}
+\end{lstlisting}}
 
 Once the search space has been reduced using this 'Dynamic DCD' algorithm, depth-first-search (DFS) is used to find actual cycles. To start a DFS tree, generate a treeToken and a pathToken, two strings that are long enough to be hard to guess. Send the following message to one of your out-neighbors:
 
-\begin{lstlisting}
+\vbox{\begin{lstlisting}
 {
-  protocol: 'ddcd-dfs-0.1',
+  protocol: 'ddcd-dfs-0.2',
   msgType: 'probe',
-  currency: <used as a unit of value here; for instance 'USD'>,
   treeToken: <a long string>,
   pathToken: <a long string>,
 }
-\end{lstlisting}
+\end{lstlisting}}
 
 Each node forwards this message to one of their out-neighbors, until it reaches a leaf node. It is then backtracked to the last internal node which has more than one out-neighbor. This node generates a new pathToken but keeps the treeToken as it is, and sends the altered message to their next out-neighbor, until they also need to backtrack.
 
@@ -138,14 +175,14 @@ If the probe reaches a node which it has already visited, this node intends to b
 
 The initiator generates a keypair and a random string to be signed. It then sends the following message to the out-neighbor to which it sent the treeToken that looped around:
 
-\begin{lstlisting}
+\vbox{\begin{lstlisting}
 {
-  protocol: 'ledgerloops-0.5',
+  protocol: 'ledgerloops-0.6',
   msgType: 'conditional-promise',
   transaction: {
     id: <a newly generated unique string>,
-    currency: <the currency from the probe>,
-    amount: <a small amount, for instance 0.01 USD, makes success more likely>,
+    asset: <something which the sender has to offer and which the receiver wants to receive>,
+    amount: <1.0 for the entire asset described, between 0 and 1 for a fraction, >1 for multiple units>,
   },
   challenge: {
     name: 'ECDSA',
@@ -154,30 +191,46 @@ The initiator generates a keypair and a random string to be signed. It then send
     cleartext: <base64 representation of a random array of bytes>,
   },
   routing: {
-    protocol: 'ddcd-dfs-0.1',
+    protocol: 'ddcd-dfs-0.2',
     treeToken: <the treeToken for which a loop was detected>,
     pathToken: <the pathToken that looped back (so not the one that was sent forward initially>,
   },
 }
-\end{lstlisting}
+\end{lstlisting}}
 
-Once this message reaches the initiator, the solution to its challenge is sent round in the opposite direction:
+Note that a sender can offer parts of a specific asset, even if the asset is a physical item that cannot be split into parts.
+For instance, I could send you 10 IOUs, each referring to the blue bicycle I showed you, and each for an amount of 0.1.
+It is important to use transaction IDs only once, so that it is clear which IOU is being triggered, and this is also tracked
+correctly in our peer-to-peer ledger afterwards. As soon as I owe you 10 times one tenth of the blue bicycle, you can claim the
+entire bicycle. You could also claim the bicycle after I owe you only 8 tenths of it, after which you would owe me the equivalent
+of 2 tenths of the blue bicycle. This requires a more long-term form of trust between us than one-off trades of entire assets or
+fungeable assets.
 
-\begin{lstlisting}
+Each participant reuses the 'challenge' part of the conditional-promise they receive, and creates a new conditional promise, mentioning
+a different asset.
+
+The current version of the protocol does not yet allow participants to negotiate exchange rates. If one of the participants offers an
+amount of asset that is clearly worth less than the amount of asset he received (attempting to make a profit on this trade), then somewhere
+else in the loop, another participant will probably be offered an unattractive trade, and refuse.
+
+Once a conditional-promise message reaches the initiator, describing the asset the initiator desires, and promising an amount which the initiator finds acceptable compared to the amount of asset he offered when starting the loop, trade becomes possible. The initiator confirms that the incoming conditional-promise message uses the same challenge
+details which he created, he solves the challenge, and the solution to the challenge is sent round in the opposite direction:
+
+\vbox{\begin{lstlisting}
 {
-  protocol: 'ledgerloops-0.5',
+  protocol: 'ledgerloops-0.6',
   msgType: 'satisfy-condition',
-  transactionId: <the transaction id from the conditional-promise message>,
-  solution: <the base64 representation of a valid signature  for the challenge from the conditional-promise message>,
+  transactionId: <the transaction.id from the conditional-promise message>,
+  solution: <the base64 representation of a valid signature for the challenge from the conditional-promise message>,
   routing: {
-    protocol: 'ddcd-dfs-0.1',
+    protocol: 'ddcd-dfs-0.2',
     treeToken: <the treeToken for which a loop was detected>,
     pathToken: <the pathToken that looped back (so not the one that was sent forward initially>,
   },
 }
-\end{lstlisting}
+\end{lstlisting}}
 
-The routing information could be left out in this message type, but is in version 0.5 for practical reasons.
+The routing information could be left out in this message type, but is in version 0.6 for practical reasons.
 
 After the receiver of a satisfy-condition message has verified its signature, it replies with the "confirm-update"
 message format earlier (using the transactionId from the "satisfy-condition" message, and once all nodes along the loop
@@ -186,26 +239,26 @@ have done this, the trade is complete.
 If a node decides it has been waiting for too long, it can request a revokation of the cryptographically triggered IOU they sent earlier,
 by sending this messages behind it:
 
-\begin{lstlisting}
+\vbox{\begin{lstlisting}
 {
-  protocol: 'ledgerloops-0.5',
+  protocol: 'ledgerloops-0.6',
   msgType: 'please-reject',
-  transactionId: <the transaction id from the conditional-promise message>,
+  transactionId: <the transaction.id from the conditional-promise message>,
 }
-\end{lstlisting}
+\end{lstlisting}}
 
 A node should probably wait a few milliseconds before forwarding a cryptographically triggered IOU, in case the IOU has been buffered in
 a slow place for a while, and now has a "please-reject" message following directly behind it.
 
 To reject the cryptographically-triggered IOU you received earlier, use this message:
 
-\begin{lstlisting}
+\vbox{\begin{lstlisting}
 {
-  protocol: 'ledgerloops-0.5',
+  protocol: 'ledgerloops-0.6',
   msgType: 'reject',
-  transactionId: <the transaction id from the conditional-promise message>,
+  transactionId: <the transaction.id from the conditional-promise message>,
 }
-\end{lstlisting}
+\end{lstlisting}}
 
 
 The rejection will only be valid if it is sent by the recipient of the conditional-promise message in question.
@@ -337,9 +390,9 @@ Without the use of LedgerLoops, trade can only be facilited, and value can only 
 Such trust in a (by itself worthless) token is often based on hype (hoping a certain crypto-currency will stay popular), or on war (politicians will generally send their soldiers to war to defend a government-issued currency when the power of the government is at risk), or on citizen-paid taxes (often used to bail out failing banks). LedgerLoops avoids this reliance on globally defined tokens, which makes it a much more decentralized technology. Any group of people can start to use the LedgerLoops protocol within their community, without relying on the health of a globally defined currency or on the health of a global network. If a hype of activity in LedgerLoops transaction rises and falls in some local geographic area, this has very little effect on the ability of people in another geographic area to use the LedgerLoops protocol. That being said, of course, communities would benefit from connecting with another community, and this would automatically happen if a few users form part of both communities. This network effect is very similar to how the internet works.
 
 \subsection{Starting to use LedgerLoops}
-First of all, let me state that version 0.5 of LedgerLoops should be considered a developer preview, and further development will most likely be needed before the protocol is production-ready. Until we gain a better understanding of the network dynamics in more complex topologies, its use is only recommended for academic experiments, not for real-world trade. Users are advised to only trade very small assets, for instance up to 1 USD, since we can't yet predict what dynamics would arise, and what other security considerations may be discovered during such initial experiments.
+First of all, let me state that version 0.6 of LedgerLoops should be considered a developer preview, and further development will most likely be needed before the protocol is production-ready. Until we gain a better understanding of the network dynamics in more complex topologies, its use is only recommended for academic experiments, not for real-world trade. Users are advised to only trade very small assets, for instance up to 1 USD, since we can't yet predict what dynamics would arise, and what other security considerations may be discovered during such initial experiments.
 
-Also, the current version of the software used on the demo page (https://ledgerloops.com/demo.html) is not recommended for production; I probably need to rewrite it from scratch, using what I learned in the last few weeks developing this version 0.5 of LedgerLoops. Importantly, the code has also not been reviewed by a security expert yet, so it's not unlikely that this implementation contains a few vulnerabilities; in short, please only use it to run simulations, don't entrust it with data about your real-world trade peers yet.
+Also, the current version of the software used on the demo page (https://ledgerloops.com/demo.html) is not recommended for production; I probably need to rewrite it from scratch, using what I learned in the last few weeks developing this version 0.6 of LedgerLoops. Importantly, the code has also not been reviewed by a security expert yet, so it's not unlikely that this implementation contains a few vulnerabilities; in short, please only use it to run simulations, don't entrust it with data about your real-world trade peers yet.
 
 One path to start using LedgerLoops in the real world, would be to develop an Android app which can access a smartphone's addressbook, and use the API of an existing end-to-end encrypted messaging platform for delivering the LedgerLoops messages to the user's neighbors. This would require a potential user to convince their real-world trade peers to install the same app, which would be impractical for casual one-time trade peers, but could work well for, for instance, people who share a house, or for the members of a sports club (where the administration of membership fees could be a driving use case).
 
