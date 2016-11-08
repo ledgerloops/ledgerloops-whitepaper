@@ -1,28 +1,44 @@
 \documentclass[11pt,twoside,a4paper]{article}
-\usepackage{listings}
-\usepackage{color}
 \usepackage{tikz}
 
-\definecolor{dkgreen}{rgb}{0,0.6,0}
-\definecolor{gray}{rgb}{0.5,0.5,0.5}
-\definecolor{mauve}{rgb}{0.58,0,0.82}
+\usepackage{bera}% optional: just to have a nice mono-spaced font
+\usepackage{listings}
+\usepackage{xcolor}
 
-\lstset{frame=tb,
-  language=Java,
-  aboveskip=3mm,
-  belowskip=3mm,
-  showstringspaces=false,
-  columns=flexible,
-  basicstyle={\small\ttfamily},
-  numbers=none,
-  numberstyle=\tiny\color{gray},
-  keywordstyle=\color{blue},
-  commentstyle=\color{dkgreen},
-  stringstyle=\color{mauve},
-  breaklines=true,
-  breakatwhitespace=true,
-  tabsize=3
+\colorlet{punct}{red!60!black}
+\definecolor{background}{HTML}{EEEEEE}
+\definecolor{delim}{RGB}{20,105,176}
+\colorlet{numb}{magenta!60!black}
+
+\lstdefinelanguage{json}{
+    basicstyle=\normalfont\ttfamily,
+%    numbers=left,
+%    numberstyle=\scriptsize,
+%    stepnumber=1,
+%    numbersep=8pt,
+%    showstringspaces=false,
+%    breaklines=true,
+%    frame=lines,
+%    backgroundcolor=\color{background},
+%    literate=
+%     *{0}{{{\color{numb}0}}}{1}
+%      {1}{{{\color{numb}1}}}{1}
+%      {2}{{{\color{numb}2}}}{1}
+%      {3}{{{\color{numb}3}}}{1}
+%      {4}{{{\color{numb}4}}}{1}
+%      {5}{{{\color{numb}5}}}{1}
+%      {6}{{{\color{numb}6}}}{1}
+%      {7}{{{\color{numb}7}}}{1}
+%      {8}{{{\color{numb}8}}}{1}
+%      {9}{{{\color{numb}9}}}{1}
+%      {:}{{{\color{punct}{:}}}}{1}
+%      {,}{{{\color{punct}{,}}}}{1}
+%      {\{}{{{\color{delim}{\{}}}}{1}
+%      {\}}{{{\color{delim}{\}}}}}{1}
+%      {[}{{{\color{delim}{[}}}}{1}
+%      {]}{{{\color{delim}{]}}}}{1},
 }
+\lstset{language=json}
 
 \begin{document}
 \title{{\em Ledger Loops}: Using cryptographically triggered IOUs to make the world go round.}
@@ -61,13 +77,35 @@ To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitt
 \draw[->,green,ultra thick] (1,0.1) --(1,0.9);
 \draw [fill=black] (1, 1) circle [radius=0.1];
 \node[above right] at (1,1) {$Dorus$};
-
-% \node[anchor=south] at (1.2, 0.5) {Apple};
-% \node[anchor=east] at (0.5, -0.2) {Banana};
-% \node[anchor=north] at (-0.2, 0.5) {Carrot};
-% \node[anchor=west] at (0.5, 1.2) {Durian};
 \end{tikzpicture}
 \caption{Abraham has a \textbf{\color{yellow} banana} to offer Bethany. Bethany has a \textbf{\color{orange} carrot} for Chad. Chad has a \textbf{\color{green} durian} for Dorus. Dorus, in turn, has an \textbf{\color{red} apple} to offer, in which Abraham is interested.}
+\end{figure}
+
+
+\begin{figure}
+\begin{tikzpicture}
+\draw [black] (1.3, 0.5) circle [radius=0.5];
+\draw [black] (0.5, 1.3) circle [radius=0.5];
+\draw [black] (0.5, -0.3) circle [radius=0.5];
+\draw [black] (-0.3, 0.5) circle [radius=0.5];
+
+\draw[->,red,ultra thick] (0.9,1.2) --(0.1,1.2);
+\draw[<-,black,ultra thick] (0.9,1.3) --(0.1,1.3);
+\node[above left] at (0,1) {$Abraham$}; 
+
+\draw[->,yellow,ultra thick] (-0.2,0.9) --(-0.2,0.1);
+\draw[<-,black,ultra thick] (-0.3,0.9) --(-0.3,0.1);
+\node[below left] at (0,0) {$Bethany$};
+
+\draw[->,orange,ultra thick] (0.1,-0.2) --(0.9,-0.2);
+\draw[<-,black,ultra thick] (0.1,-0.3) --(0.9,-0.3);
+\node[below right] at (1,0) {$Chad$};
+
+\draw[->,green,ultra thick] (1.2,0.1) --(1.2,0.9);
+\draw[<-,black,ultra thick] (1.3,0.1) --(1.3,0.9);
+\node[above right] at (1,1) {$Dorus$};
+\end{tikzpicture}
+\caption{Using money to decompose the flow of assets into four local transactions.}
 \end{figure}
 
 What makes the Whispering Merchants problem hard is that for instance in this example, Abraham initially has no way of obtaining the apple from Dorus, since he has nothing of interest to offer to Dorus. Abraham also has no knowledge of the existence of Chad, and he does not trust Chad.
@@ -100,13 +138,13 @@ Before finding a loop along which assets can move around, the first step of the 
 
 \vbox{\begin{lstlisting}
 {
-  protocol: 'local-ledgers-0.2',
-  msgType: 'initiate-update',
-  transactionId: <a unique string>,
-  note: <a description of why this IOU is being sent, for instance "you paid for dinner yesterday">,
-  debtor: <identifier of the sender; this can be just a first name, as long as it's different from the first name of the recipient>,
-  addedDebts: {
-    [asset]: amount, // for instance 'USD': 10,
+  "protocol": "local-ledgers-0.2",
+  "msgType": "initiate-update",
+  "transactionId": "<a unique string>",
+  "note": "<a description of why this IOU is being sent>,
+  "debtor": "<identifier of the sender; just a nickname>",
+  "addedDebts": {
+    "unit": amount, // for instance "USD": 10,
   },
 }
 \end{lstlisting}}
@@ -115,9 +153,9 @@ Even if the communication network is reliable and would detect network outages w
 
 \vbox{\begin{lstlisting}
 {
-  protocol: 'local-ledgers-0.2',
-  msgType: 'confirm-update',
-  transactionId: <same as in initiate-update message it confirms>,
+  "protocol": "local-ledgers-0.2",
+  "msgType": "confirm-update",
+  "transactionId": "<same as in initiate-update message>",
 }
 \end{lstlisting}}
 
@@ -148,10 +186,10 @@ A node can send its "I'm not on a cycle" message in error or while lying on purp
 
 \vbox{\begin{lstlisting}
 {
-  protocol: 'ddcd-dfs-0.2',
-  msgType: 'update-status',
-  value: <true if the sending node might be on a cycle, false if it definitely isn't>
-  isReply: <true indicates this message is a reply to an earlier message>,
+  "protocol": "ddcd-dfs-0.2",
+  "msgType": "update-status",
+  "value": "<true iff sending node might be on cycle>",
+  "isReply": "<true iff this message is a reply>",
 }
 \end{lstlisting}}
 
@@ -159,10 +197,10 @@ Once the search space has been reduced using this 'Dynamic DCD' algorithm, depth
 
 \vbox{\begin{lstlisting}
 {
-  protocol: 'ddcd-dfs-0.2',
-  msgType: 'probe',
-  treeToken: <a long string>,
-  pathToken: <a long string>,
+  "protocol": "ddcd-dfs-0.2",
+  "msgType": "probe",
+  "treeToken": "<a long string>",
+  "pathToken": "<a long string>",
 }
 \end{lstlisting}}
 
@@ -177,23 +215,23 @@ The initiator generates a keypair and a random string to be signed. It then send
 
 \vbox{\begin{lstlisting}
 {
-  protocol: 'ledgerloops-0.6',
-  msgType: 'conditional-promise',
-  transaction: {
-    id: <a newly generated unique string>,
-    asset: <something which the sender has to offer and which the receiver wants to receive>,
-    amount: <1.0 for the entire asset described, between 0 and 1 for a fraction, >1 for multiple units>,
+  "protocol": "ledgerloops-0.6",
+  "msgType": "conditional-promise",
+  "transaction": {
+    "id": "<a newly generated unique string>",
+    "unit": "<something the sender has to offer>",
+    "amount": "<number of units offered>",
   },
-  challenge: {
-    name: 'ECDSA',
-    namedCurve: 'P-256',
-    pubkey: <base64 representation of public key in spki format>,
-    cleartext: <base64 representation of a random array of bytes>,
+  "challenge": {
+    "name": "ECDSA",
+    "namedCurve": "P-256",
+    "pubkey": "<public key in base64 spki format>",
+    "cleartext": "<a random array of bytes in base64>",
   },
-  routing: {
-    protocol: 'ddcd-dfs-0.2',
-    treeToken: <the treeToken for which a loop was detected>,
-    pathToken: <the pathToken that looped back (so not the one that was sent forward initially>,
+  "routing": {
+    "protocol": "ddcd-dfs-0.2",
+    "treeToken": "<the treeToken of detected loop>",
+    "pathToken": "<the pathToken that looped back>",
   },
 }
 \end{lstlisting}}
@@ -218,14 +256,14 @@ details which he created, he solves the challenge, and the solution to the chall
 
 \vbox{\begin{lstlisting}
 {
-  protocol: 'ledgerloops-0.6',
-  msgType: 'satisfy-condition',
-  transactionId: <the transaction.id from the conditional-promise message>,
-  solution: <the base64 representation of a valid signature for the challenge from the conditional-promise message>,
-  routing: {
-    protocol: 'ddcd-dfs-0.2',
-    treeToken: <the treeToken for which a loop was detected>,
-    pathToken: <the pathToken that looped back (so not the one that was sent forward initially>,
+  "protocol": "ledgerloops-0.6",
+  "msgType": "satisfy-condition",
+  "transactionId": "<transaction.id from earlier>",
+  "solution": "<base64 valid signature for the challenge>",
+  "routing": {
+    "protocol": "ddcd-dfs-0.2",
+    "treeToken": "<the treeToken of detected loop>",
+    "pathToken": "<the pathToken that looped back>",
   },
 }
 \end{lstlisting}}
@@ -241,9 +279,9 @@ by sending this messages behind it:
 
 \vbox{\begin{lstlisting}
 {
-  protocol: 'ledgerloops-0.6',
-  msgType: 'please-reject',
-  transactionId: <the transaction.id from the conditional-promise message>,
+  "protocol": "ledgerloops-0.6",
+  "msgType": "please-reject",
+  "transactionId": "<transaction.id from earlier>",
 }
 \end{lstlisting}}
 
@@ -254,9 +292,9 @@ To reject the cryptographically-triggered IOU you received earlier, use this mes
 
 \vbox{\begin{lstlisting}
 {
-  protocol: 'ledgerloops-0.6',
-  msgType: 'reject',
-  transactionId: <the transaction.id from the conditional-promise message>,
+  "protocol": "ledgerloops-0.6",
+  "msgType": "reject",
+  "transactionId": "<transaction.id from earlier>",
 }
 \end{lstlisting}}
 
@@ -392,7 +430,7 @@ Such trust in a (by itself worthless) token is often based on hype (hoping a cer
 \subsection{Starting to use LedgerLoops}
 First of all, let me state that version 0.6 of LedgerLoops should be considered a developer preview, and further development will most likely be needed before the protocol is production-ready. Until we gain a better understanding of the network dynamics in more complex topologies, its use is only recommended for academic experiments, not for real-world trade. Users are advised to only trade very small assets, for instance up to 1 USD, since we can't yet predict what dynamics would arise, and what other security considerations may be discovered during such initial experiments.
 
-Also, the current version of the software used on the demo page (https://ledgerloops.com/demo.html) is not recommended for production; I probably need to rewrite it from scratch, using what I learned in the last few weeks developing this version 0.6 of LedgerLoops. Importantly, the code has also not been reviewed by a security expert yet, so it's not unlikely that this implementation contains a few vulnerabilities; in short, please only use it to run simulations, don't entrust it with data about your real-world trade peers yet.
+Also, the current version of the software used on the demo page is not recommended for production; I probably need to rewrite it from scratch, using what I learned in the last few weeks developing this version 0.6 of LedgerLoops. Importantly, the code has also not been reviewed by a security expert yet, so it's not unlikely that this implementation contains a few vulnerabilities; in short, please only use it to run simulations, don't entrust it with data about your real-world trade peers yet.
 
 One path to start using LedgerLoops in the real world, would be to develop an Android app which can access a smartphone's addressbook, and use the API of an existing end-to-end encrypted messaging platform for delivering the LedgerLoops messages to the user's neighbors. This would require a potential user to convince their real-world trade peers to install the same app, which would be impractical for casual one-time trade peers, but could work well for, for instance, people who share a house, or for the members of a sports club (where the administration of membership fees could be a driving use case).
 
