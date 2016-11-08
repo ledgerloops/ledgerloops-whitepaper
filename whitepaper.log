@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=latex 2016.10.6)  8 NOV 2016 12:12
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=latex 2016.10.6)  8 NOV 2016 12:56
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -529,13 +529,21 @@ LaTeX Font Info:    Font shape `T1/fve/b/n' will be
  [2]
 LaTeX Font Info:    Font shape `T1/fve/b/n' will be
 (Font)              scaled to size 10.79993pt on input line 134.
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
  [3]
 LaTeX Font Info:    Try loading font information for T1+fvm on input line 139.
- (/usr/share/texlive/texmf-dist/tex/latex/bera/t1fvm.fd
+
+(/usr/share/texlive/texmf-dist/tex/latex/bera/t1fvm.fd
 File: t1fvm.fd 2004/09/07 scalable font definitions for T1/fvm.
 )
 LaTeX Font Info:    Font shape `T1/fvm/m/n' will be
 (Font)              scaled to size 9.85492pt on input line 139.
+
+Underfull \vbox (badness 5022) has occurred while \output is active []
+
+ [4]
 LaTeX Font Info:    Try loading font information for TS1+fve on input line 169.
 
 
@@ -544,27 +552,28 @@ File: ts1fve.fd 2004/09/07 scalable font definitions for TS1/fve.
 )
 LaTeX Font Info:    Font shape `TS1/fve/m/n' will be
 (Font)              scaled to size 9.85492pt on input line 169.
- [4]
+
 Overfull \hbox (3.3584pt too wide) in paragraph at lines 178--179
 \T1/fve/m/n/10.95 bounce back and be-come re-ply mes-sages mean-ing "No cy-cles
  here". 
  []
 
 [5]
-Underfull \vbox (badness 2460) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [6]
-Overfull \hbox (5.71582pt too wide) in paragraph at lines 247--249
+[7]
+Overfull \hbox (5.71582pt too wide) in paragraph at lines 251--253
 []\T1/fve/m/n/10.95 Each par-tic-i-pant reuses the 'chal-lenge' part of the con
 ditional-promise
  []
 
-[7]
-Underfull \vbox (badness 1259) has occurred while \output is active []
+
+Underfull \vbox (badness 7433) has occurred while \output is active []
 
  [8]
 [9] [10] [11]
-Overfull \hbox (5.75168pt too wide) in paragraph at lines 381--382
+Overfull \hbox (5.75168pt too wide) in paragraph at lines 379--380
 \T1/fve/m/n/10.95 they don't have a real-world trust re-la-tion-ship. Adding a 
 ma-li-cious debtor-
  []
@@ -573,10 +582,10 @@ ma-li-cious debtor-
 Here is how much of TeX's memory you used:
  12422 strings out of 493030
  245786 string characters out of 6136260
- 284908 words of memory out of 5000000
+ 285908 words of memory out of 5000000
  15756 multiletter control sequences out of 15000+600000
  29715 words of font info for 40 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  55i,6n,54p,1449b,859s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on whitepaper.dvi (18 pages, 73492 bytes).
+Output written on whitepaper.dvi (18 pages, 74756 bytes).
