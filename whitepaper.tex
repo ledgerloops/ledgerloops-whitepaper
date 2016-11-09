@@ -134,7 +134,7 @@ Since the challenge used in all cryptographically triggered IOUs was the same on
 In the last few weeks, I have implemented a few design iterations of the LedgerLoops protocol. Future versions are likely to differ from this, but let me describe roughly how it currently works.
 
 \subsection{Peer-to-peer Ledgers}
-As Graeber noted in his book "Debt: the first 5,000 years", peer-to-peer debt is useful for time-skewed barter between two peers; I give you something now, and you give me something in exchange tomorrow; in the meantime, a debt exists. This is why LedgerLoops is based on peer-to-peer ledgers (that is, ledgers on which two people keep track of what they owe each other).
+As Graeber noted in his book "Debt: the first 5,000 years" ~\cite{Graeber2011}, peer-to-peer debt is useful for time-skewed barter between two peers; I give you something now, and you give me something in exchange tomorrow; in the meantime, a debt exists. This is why LedgerLoops is based on peer-to-peer ledgers (that is, ledgers on which two people keep track of what they owe each other).
 
 Before finding a loop along which assets can move around, the first step of the algorithm consists of agents building up a ledger with each of their neighbors in the graph, by sending each other standard, unconditional IOUs, of the following format:
 
@@ -165,7 +165,7 @@ So in the current implementation, the exchange of assets is done asynchronously,
 
 \subsection{Routing}
 
-Finding cycles in a graph of which no one has a bird's eye view is an interesting computer science problem. Recently, 'Distributed Cycle Detection and Removal' was included in a non-free IEEE publication (ieeexplore.ieee.org/document/7516708/). Unfortunately, due to the scientific journal's policy, no public version of the algorithm is available yet, but I can try to explain it in my own words:
+Finding cycles in a graph of which no one has a bird's eye view is an interesting computer science problem. Recently, 'Distributed Cycle Detection and Removal' ~\cite{Oliva2016} was included in a non-free IEEE publication. Unfortunately, due to the scientific journal's policy, no public version of the algorithm is available yet (you can buy the article from the IEEE website), but I can try to explain it in my own words:
 
 \begin{itemize}
 \item each leaf node (one that has either only in-neighbors or only out-neighbors), goes into 'deactivated' mode, and initiates a bread-first wave of messages through the network; from the point of view of each node, these messages mean as much as "I am sure I'm not part of a cycle".
@@ -448,4 +448,6 @@ GitHub issues for public discussion, here:
 https://github.com/ledgerloops/ledgerloops-whitepaper/issues
 
 LedgerLoops is a research project that was started by Michiel de Jong, and that is open to participation. The LedgerLoops protocol, as a solution to the Whispering Merchants problem and as an alternative to money, is published patent-free under a Creative Commons license (CC-BY-SA 3.0).
+\bibliography{whitepaper}
+\bibliographystyle{plain}
 \end{document}
