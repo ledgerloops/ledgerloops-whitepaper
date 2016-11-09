@@ -46,11 +46,11 @@
 \date{November 2016}
 \maketitle
 \begin{abstract}
-LedgerLoops is a novel financial technology. Rather than a crypto-currency or new form of money, it is better viewed as an alternative to money. At its core is the concept of {\em cryptographically triggered IOUs}.
+LedgerLoops is a novel financial technology. Ra\-ther than a cryp\-to-cur\-ren\-cy or new form of mo\-ney, it is better viewed as an alternative to money. At its core is the concept of {\em cryptographically triggered IOUs}.
 
 In this whitepaper, the Whispering Merchants problem serves as a simplified abstraction of economic exchange in general, where assets flow in loops. Traditionally, money would flow in the opposite direction, thus solving the coordination problem by effectively reducing the loop to a chain of one-to-one transactions. But money has a number of downsides, mainly due to the need to trust people other than your direct economical neighbors. Value fluctuations in a currency act as a single point of failure, which can have devastating effects on economic trade. LedgerLoops aims to allow assets to move around, while every trader only needs to trusts their own direct peers.
 
-LedgerLoops is a novel solution to the Whispering Merchants problem, based on cryptographically triggering each local IOU, rather than moving some sort of currency around the circle of merchants in the opposite direction.
+LedgerLoops is a novel solution to the Whispering Merchants problem, based on cryptographically triggering each local IOU, ra\-ther than mo\-ving some sort of currency around the circle of merchants in the opposite direction.
 \end{abstract}
 
 \section{The Whispering Merchants Problem}
@@ -177,7 +177,7 @@ I adapted this algorithm slightly to make it work in graphs whose topology can c
 
 \begin{itemize}
 \item When a debt link is added, the nodes connected by the link both send out a breadth-first wave of messages meaning "I might be part of a cycle".
-\item These messages travel to the leafs of the network, where they bounce back and become reply messages meaning "No cycles here".
+\item These messages travel to the leafs of the net\-work, where they bounce back and be\-come re\-ply mes\-sa\-ges that mean "No cy\-cles here".
 \item Like in the original DCD algorithm, a node deactivates if it has received a "No" from either all out-neighbors or all in-neighbors, and then sends the "No cycles here" message on forward breadth-first, in its direction of travel.
 \item Nodes also deactivate as necessary when links disappear from the network.
 \end{itemize}
@@ -248,7 +248,7 @@ government-issued currency, a crypto-currency, a rare metal, or kiloWatt-hours o
 For the conditional-promise I send you, it only matters that we agree on what the unit of value refers to, and unlike currencies which are
 used as money, this unit of value does not need to have any meaning to anyone apart from the two peers who discuss it.
 
-Each participant reuses the 'challenge' part of the conditional-promise they receive, and creates a new conditional promise, mentioning
+Each participant reuses the 'challenge' part of the con\-di\-tio\-nal-pro\-mise they receive, and creates a new conditional promise, mentioning
 a different unit of value and amount, depending on the asset they want to offer their peer in this cryptographically triggered IOU.
 
 The current version of the protocol does not yet allow participants to negotiate exchange rates in any meaningful way.
@@ -264,7 +264,7 @@ details which he created, he solves the challenge, and the solution to the chall
   "protocol": "ledgerloops-0.6",
   "msgType": "satisfy-condition",
   "transactionId": "<transaction.id from earlier>",
-  "solution": "<the original random string in base64 format>",
+  "solution": "<original random string in base64 format>",
 }
 \end{lstlisting}}
 
@@ -381,7 +381,7 @@ While the user's app is running on the computer, it needs to access all informat
 The following threat descriptions all assume the user's computer is clean and the app functions correctly.
 
 \subsubsection{Social Engineering}
-A user could be convinced by an attacker to add a neighbor with whom they don't have a real-world trust relationship. Adding a malicious debtorcould expose information about the user's creditors. For instance, if an attacker wants to know if the user frequents a certain restaurant, they could buy a meal voucher from that restaurant, and at the same time offer something attractive to the user. If the user accepts the offer from the attacker, then the next time the user eats at that restaurant, the user's app could cooperate with the restaurant's app and the attacker's app to find a loop. If such a loop is found, then the attacker knows that either the user just visited the restaurant, or the user owes something to a participant, (who owes something to a participant, who \ldots) owes something to the restaurant.
+A user could be convinced by an attacker to add a neighbor with whom they don't have a real-world trust relationship. Adding a ma\-li\-cious deb\-tor could expose information about the user's creditors. For instance, if an attacker wants to know if the user frequents a certain restaurant, they could buy a meal voucher from that restaurant, and at the same time offer something attractive to the user. If the user accepts the offer from the attacker, then the next time the user eats at that restaurant, the user's app could cooperate with the restaurant's app and the attacker's app to find a loop. If such a loop is found, then the attacker knows that either the user just visited the restaurant, or the user owes something to a participant, (who owes something to a participant, who \ldots) owes something to the restaurant.
 
 Adding a malicious creditor could likewise expose information about the user's debtors.
 
