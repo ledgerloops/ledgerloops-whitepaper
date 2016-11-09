@@ -118,7 +118,7 @@ This whitepaper proposes a solution to the Whispering Merchants problem, called 
 An IOU (short for "I owe you") is a message or document representing a debt.
 A cryptographically triggered IOU contains the same data as a standard IOU (debtor, beneficiary, asset owed, etc.), plus a cryptographic challenge.
 
-The IOU is without value until the beneficiary presents a valid solution to the challenge. In the current version of the LedgerLoops protocol, the cryptographic challenge is defined by a public key and a clear\-text; the challenge is simply to sign the clear\-text. Only the person holding the corresponding private key will be able to do this, yet everybody can easily verify and agree if a solution to the challenge is valid or not. Another possible challenge type would probably be to "Which cleartext has the following hash: (...) when applying the following secure hash algorithm to it: (...)". I have yet to talk to a security expert about this; if you have any suggestions, please comment here:
+The IOU is without value until the beneficiary presents a valid solution to the challenge. In the current version of the LedgerLoops protocol, the cryptographic challenge is defined by the SHA-256 hash of a random string; the challenge is simply to find the string (or more precisely, {\i a} string) that has the hash value from the challenge. Only the person holding the original string will be able to do this, yet everybody can easily verify and agree if a solution to the challenge is valid or not. If you know of a better type of challenge scheme, then please comment here:
 
 https://github.com/ledgerloops/ledgerloops-whitepaper/issues/1
 
@@ -214,7 +214,7 @@ If the probe reaches a node which it has already visited, this node has discover
 
 \subsection{Cryptographically triggered IOUs}
 
-The initiator generates a keypair and a random string to be signed. It then sends the following message to the out-neighbor to which it sent the treeToken that looped around:
+The initiator generates a random string and calculates its SHA-256 hash value. It then sends the following message to the out-neighbor to which it sent the treeToken that looped around:
 
 \vbox{\begin{lstlisting}
 {
@@ -226,10 +226,8 @@ The initiator generates a keypair and a random string to be signed. It then send
     "amount": "<number of units offered>",
   },
   "challenge": {
-    "name": "ECDSA",
-    "namedCurve": "P-256",
-    "pubkey": "<public key in base64 spki format>",
-    "cleartext": "<a random array of bytes in base64>",
+    "function": "SHA-256",
+    "hash": "<hash value in base64 format>",
   },
   "routing": {
     "protocol": "ddcd-dfs-0.2",
@@ -266,13 +264,13 @@ details which he created, he solves the challenge, and the solution to the chall
   "protocol": "ledgerloops-0.6",
   "msgType": "satisfy-condition",
   "transactionId": "<transaction.id from earlier>",
-  "solution": "<base64 valid signature for the challenge>",
+  "solution": "<the original random string in base64 format>",
 }
 \end{lstlisting}}
 
-After the receiver of a satisfy-condition message has verified its signature, it replies with the "confirm-update"
-message format earlier (using the transactionId from the "satisfy-condition" message, and once all nodes along the loop
-have done this, the trade is complete.
+
+The receiver of a satisfy-condition message converts the solution field from its base64 representation, calculates the SHA-256 hash value of the resulting raw bytes, and converts the hash value back to base64 representation. If the result matches the hash value from the challenge, the solution has been verified to be correct. The receiver replies with the "confirm-update"
+message format from earlier (using the transactionId from the "satisfy-condition" message) to confirm to the sender that the solution has been accepted, and the receiver agrees with the resulting update of their peer-to-peer ledger. The receiver has now lost the asset from their own earlier conditional-promise message, but has gained knowledge of the solution to the challenge used in all conditional-promise messages sent earlier. He uses the solution to create his own satisfy-condition message and claim the asset that was conditionally promised to him by his other neighbor in the loop. Once all nodes along the loop have done this, the trade is complete.
 
 If a node decides it has been waiting for too long, it can request a revokation of the cryptographically triggered IOU they sent earlier,
 by sending this messages behind it:
