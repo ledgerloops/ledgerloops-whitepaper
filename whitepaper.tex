@@ -159,7 +159,7 @@ To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitt
 \draw[->,green,ultra thick] (7.6,0.1) --(7.6,0.9);
 \draw [fill=black] (7,1) circle [radius=0.1];
 \end{tikzpicture}
-\caption{Using a \textbf{\color{cyan} LedgerLoops challenge} and a \textbf{\color{magenta} LedgerLoops trigger} to safely coordinate all four transactions.}
+\caption{First, a \textbf{\color{cyan} LedgerLoops challenge} is sent around. Each participant uses the challenge to create a cryptographically triggered IOU. Then, the originator solves the challenge and sends the \textbf{\color{magenta} LedgerLoops trigger} around in the opposite direction. This safely coordinates all four transactions by triggering all of them in one atomic event.}
 \end{figure}
 
 What makes the Whispering Merchants problem hard is that for instance in this example, Abraham initially has no way of obtaining the apple from Dorus, since he has nothing of interest to offer to Dorus. Abraham also has no knowledge of the existence of Chad, and he does not trust Chad.
