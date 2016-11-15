@@ -109,91 +109,112 @@ To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitt
 
 \begin{figure}
 \begin{tikzpicture}[scale=0.92]
-\draw[->,cyan,ultra thick] (1.2,1.2) --(0.1,1.2);
+\node[above left] at (0,1) {$A$};
+\node[above left] at (3,1) {$A$};
+\node[above left] at (6,1) {$A$};
+\node[above left] at (9,1) {$A$};
+\node[above left] at (12,1) {$A$};
+
+\node[below left] at (0,0) {$B$};
+\node[below left] at (3,0) {$B$};
+\node[below left] at (6,0) {$B$};
+
+\node[below right] at (1,0) {$C$};
+\node[below right] at (4,0) {$C$};
+
+\node[above right] at (1,1) {$D$};
+
+\node[below] at (0.5,-0.5) {$1)$};
+\node[below] at (3.5,-0.5) {$2)$};
+\node[below] at (6.5,-0.5) {$3)$};
+\node[below] at (9.5,-0.5) {$4)$};
+\node[below] at (12.5,-0.5) {$5)$};
+
+\draw[->,cyan,ultra thick] (0.8,0.8) --(0.3,0.8);
 \draw [fill=black] (0,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (-0.2,0.9) --(-0.2,-0.2);
-\draw [fill=black] (0,0) circle [radius=0.1];
-
-\draw[->,cyan,ultra thick] (-0.2,-0.2) --(1.2,-0.2);
-\draw [fill=black] (1,0) circle [radius=0.1];
-
-\draw[->,cyan,ultra thick] (1.2,-0.2) --(1.2,1.2);
+\draw[->,cyan,ultra thick] (0.8,0.2) --(0.8,0.8);
 \draw [fill=black] (1,1) circle [radius=0.1];
 
+\draw[->,cyan,ultra thick] (0.2,0.2) --(0.8,0.2);
+\draw [fill=black] (1,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (4.2,1.2) --(3.1,1.2);
-\draw[<-,magenta,ultra thick] (4.4,1.4) --(3.1,1.4);
+\draw[->,cyan,ultra thick] (0.2,0.7) --(0.2,0.2);
+\draw [fill=black] (0,0) circle [radius=0.1];
+
+
+\draw[->,cyan,ultra thick] (3.8,0.8) --(3.3,0.8);
+\draw[<-,magenta,ultra thick] (4.2,1.2) --(3.1,1.2);
 \draw[->,red,ultra thick] (3.9,1.0) --(3.1,1.0);
 \draw [fill=black] (3,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (2.8,0.9) --(2.8,-0.2);
-\draw [fill=black] (3,0) circle [radius=0.1];
-
-\draw[->,cyan,ultra thick] (2.8,-0.2) --(4.2,-0.2);
-\draw [fill=black] (4,0) circle [radius=0.1];
-
-\draw[->,cyan,ultra thick] (4.2,-0.2) --(4.2,1.2);
+\draw[->,cyan,ultra thick] (3.8,0.2) --(3.8,0.8);
 \draw [fill=black] (4,1) circle [radius=0.1];
 
+\draw[->,cyan,ultra thick] (3.2,0.2) --(3.8,0.2);
+\draw [fill=black] (4,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (7.2,1.2) --(6.1,1.2);
-\draw[<-,magenta,ultra thick] (7.4,1.4) --(6.1,1.4);
+\draw[->,cyan,ultra thick] (3.2,0.7) --(3.2,0.2);
+\draw [fill=black] (3,0) circle [radius=0.1];
+
+
+\draw[->,cyan,ultra thick] (6.8,0.8) --(6.3,0.8);
+\draw[<-,magenta,ultra thick] (7.2,1.2) --(6.1,1.2);
 \draw[->,red,ultra thick] (6.9,1.0) --(6.1,1.0);
 \draw [fill=black] (6,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (5.8,0.9) --(5.8,-0.2);
-\draw [fill=black] (6,0) circle [radius=0.1];
-
-\draw[->,cyan,ultra thick] (5.8,-0.2) --(7.2,-0.2);
-\draw [fill=black] (7,0) circle [radius=0.1];
-
-\draw[->,cyan,ultra thick] (7.2,-0.2) --(7.2,1.2);
-\draw[<-,magenta,ultra thick] (7.4,-0.4) --(7.4,1.4);
+\draw[->,cyan,ultra thick] (6.8,0.2) --(6.8,0.8);
+\draw[<-,magenta,ultra thick] (7.2,-0.2) --(7.2,1.2);
 \draw[->,green,ultra thick] (7,0.1) --(7,0.9);
 \draw [fill=black] (7,1) circle [radius=0.1];
 
+\draw[->,cyan,ultra thick] (6.2,0.2) --(6.8,0.2);
+\draw [fill=black] (7,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (10.2,1.2) --(9.1,1.2);
-\draw[<-,magenta,ultra thick] (10.4,1.4) --(9.1,1.4);
+\draw[->,cyan,ultra thick] (6.2,0.7) --(6.2,0.2);
+\draw [fill=black] (6,0) circle [radius=0.1];
+
+
+\draw[->,cyan,ultra thick] (9.8,0.8) --(9.3,0.8);
+\draw[<-,magenta,ultra thick] (10.2,1.2) --(9.1,1.2);
 \draw[->,red,ultra thick] (9.9,1.0) --(9.1,1.0);
 \draw [fill=black] (9,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (8.8,0.9) --(8.8,-0.2);
-\draw [fill=black] (9,0) circle [radius=0.1];
-
-\draw[->,cyan,ultra thick] (8.8,-0.2) --(10.2,-0.2);
-\draw[<-,magenta,ultra thick] (8.6,-0.4) --(10.4,-0.4);
-\draw[->,orange,ultra thick] (9.1,0) --(9.9,0);
-\draw [fill=black] (10,0) circle [radius=0.1];
-
-\draw[->,cyan,ultra thick] (10.2,-0.2) --(10.2,1.2);
-\draw[<-,magenta,ultra thick] (10.4,-0.4) --(10.4,1.4);
+\draw[->,cyan,ultra thick] (9.8,0.2) --(9.8,0.8);
+\draw[<-,magenta,ultra thick] (10.2,-0.2) --(10.2,1.2);
 \draw[->,green,ultra thick] (10,0.1) --(10,0.9);
 \draw [fill=black] (10,1) circle [radius=0.1];
 
+\draw[->,cyan,ultra thick] (9.2,0.2) --(9.8,0.2);
+\draw[<-,magenta,ultra thick] (8.8,-0.2) --(10.2,-0.2);
+\draw[->,orange,ultra thick] (9.1,0) --(9.9,0);
+\draw [fill=black] (10,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (13.2,1.2) --(12.1,1.2);
-\draw[<-,magenta,ultra thick] (13.4,1.4) --(12.1,1.4);
+\draw[->,cyan,ultra thick] (9.2,0.7) --(9.2,0.2);
+\draw [fill=black] (9,0) circle [radius=0.1];
+
+
+\draw[->,cyan,ultra thick] (12.8,0.8) --(12.3,0.8);
+\draw[<-,magenta,ultra thick] (13.2,1.2) --(12.1,1.2);
 \draw[->,red,ultra thick] (12.9,1.0) --(12.1,1.0);
 \draw [fill=black] (12,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (11.8,0.9) --(11.8,-0.2);
-\draw[<-,magenta,ultra thick] (11.6,0.9) --(11.6,-0.4);
-\draw[->,yellow,ultra thick] (12,0.9) --(12,0.1);
-\draw [fill=black] (12,0) circle [radius=0.1];
+\draw[->,cyan,ultra thick] (12.8,0.2) --(12.8,0.8);
+\draw[<-,magenta,ultra thick] (13.2,-0.2) --(13.2,1.2);
+\draw[->,green,ultra thick] (13,0.1) --(13,0.9);
+\draw [fill=black] (13,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (11.8,-0.2) --(13.2,-0.2);
-\draw[<-,magenta,ultra thick] (11.6,-0.4) --(13.4,-0.4);
+\draw[->,cyan,ultra thick] (12.2,0.2) --(12.8,0.2);
+\draw[<-,magenta,ultra thick] (11.8,-0.2) --(13.2,-0.2);
 \draw[->,orange,ultra thick] (12.1,0) --(12.9,0);
 \draw [fill=black] (13,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (13.2,-0.2) --(13.2,1.2);
-\draw[<-,magenta,ultra thick] (13.4,-0.4) --(13.4,1.4);
-\draw[->,green,ultra thick] (13,0.1) --(13,0.9);
-\draw [fill=black] (13,1) circle [radius=0.1];
+\draw[->,cyan,ultra thick] (12.2,0.7) --(12.2,0.2);
+\draw[<-,magenta,ultra thick] (11.8,0.9) --(11.8,-0.2);
+\draw[->,yellow,ultra thick] (12,0.9) --(12,0.1);
+\draw [fill=black] (12,0) circle [radius=0.1];
 \end{tikzpicture}
-\caption{First, a \textbf{\color{cyan} LedgerLoops challenge} is sent around. Each participant uses the challenge to create a cryptographically triggered IOU. Then, the originator solves the challenge and sends the \textbf{\color{magenta} LedgerLoops trigger} around in the opposite direction. This safely coordinates all four transactions by triggering all of them in one atomic event.}
+\caption{Step 1: Each participant uses the same LedgerLoops challenge to send a \textbf{\color{cyan} cryptographically triggered IOU}. Step 2: Only Abraham can solve the challenge, and uses the solution as a \textbf{\color{magenta} LedgerLoops trigger} to claim the {\color{red} Apple}. Step 3: Dorus reuses the trigger to claim the {\color{green} Durian}. Step 4: Chad can now claim the {\color{orange} Carrot}. Step 5: Bethany claims the {\color{yellow} Banana} from Abraham. This safely coordinates all four transactions in one atomic trigger.}
 \end{figure}
 
 What makes the Whispering Merchants problem hard is that for instance in this example, Abraham initially has no way of obtaining the apple from Dorus, since he has nothing of interest to offer to Dorus. Abraham also has no knowledge of the existence of Chad, and he does not trust Chad.
