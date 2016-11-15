@@ -214,7 +214,7 @@ To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitt
 \draw[->,yellow,ultra thick] (12,0.9) --(12,0.1);
 \draw [fill=black] (12,0) circle [radius=0.1];
 \end{tikzpicture}
-\caption{Step 1: Each participant uses the same LedgerLoops challenge to send a \textbf{\color{cyan} cryptographically triggered IOU}. Step 2: Only Abraham can solve the challenge, and uses the solution as a \textbf{\color{magenta} LedgerLoops trigger} to claim the {\color{red} Apple}. Step 3: Dorus reuses the trigger to claim the {\color{green} Durian}. Step 4: Chad can now claim the {\color{orange} Carrot}. Step 5: Bethany claims the {\color{yellow} Banana} from Abraham. This safely coordinates all four transactions in one atomic trigger.}
+\caption{Step 1) Each participant uses the same LedgerLoops challenge to send a \textbf{\color{cyan} cryptographically triggered IOU}. Step 2) Only Abraham can solve the challenge, and uses the solution as a \textbf{\color{magenta} LedgerLoops trigger} to claim the {\color{red} Apple}. Step 3) Dorus reuses the trigger to claim the {\color{green} Durian}. Step 4) Chad can now claim the {\color{orange} Carrot}. Step 5) Bethany claims the {\color{yellow} Banana} from Abraham. This safely coordinates all four transactions in one atomic trigger.}
 \end{figure}
 
 What makes the Whispering Merchants problem hard is that for instance in this example, Abraham initially has no way of obtaining the apple from Dorus, since he has nothing of interest to offer to Dorus. Abraham also has no knowledge of the existence of Chad, and he does not trust Chad.
