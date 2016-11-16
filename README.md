@@ -1,6 +1,8 @@
 # whitepaper
 LaTeX source of https://ledgerloops.com/doc/whitepaper.pdf
 
+For more info on [LedgerLoops](https://ledgerloops.com), see: https://ledgerloops.com
+
 # Build
 ```bash
 $ latex whitepaper.tex
