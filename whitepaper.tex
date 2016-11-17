@@ -250,7 +250,7 @@ Once the initiator receives a cryptographically triggered IOU from his own right
 
 Since the challenge used in all cryptographically triggered IOUs was the same one for all trades along the loop, the solution to this challenge acts as a cryptographic trigger, but its meaning is different from the meaning of a cryptographic coin: it represents no value, it only represents a "Go!" signal which all participants recognize. Therefore, LedgerLoops should be considered an alternative to money, rather than an alternative form of money.
 
-\section{The LedgerLoops Protocol (version 0.6)}
+\section{The LedgerLoops Protocol (version 0.7)}
 In the last few weeks, I have implemented a few design iterations of the LedgerLoops protocol. Future versions are likely to differ from this, but let me describe roughly how it currently works.
 
 \subsection{Peer-to-peer Ledgers}
@@ -338,7 +338,7 @@ The initiator generates a random string and calculates its SHA-256 hash value. I
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.6",
+  "protocol": "ledgerloops-0.7",
   "msgType": "conditional-promise",
   "transaction": {
     "id": "<a newly generated unique string>",
@@ -381,7 +381,7 @@ details which he created, he solves the challenge, and the solution to the chall
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.6",
+  "protocol": "ledgerloops-0.7",
   "msgType": "satisfy-condition",
   "transactionId": "<transaction.id from earlier>",
   "solution": "<original random string in base64 format>",
@@ -397,7 +397,7 @@ by sending this messages behind it:
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.6",
+  "protocol": "ledgerloops-0.7",
   "msgType": "please-reject",
   "transactionId": "<transaction.id from earlier>",
 }
@@ -410,7 +410,7 @@ To reject the cryptographically-triggered IOU you received earlier, use this mes
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.6",
+  "protocol": "ledgerloops-0.7",
   "msgType": "reject",
   "transactionId": "<transaction.id from earlier>",
 }
@@ -551,9 +551,9 @@ Without the use of LedgerLoops, trade can only be facilited, and value can only 
 Such trust in a (by itself worthless) token is often based on hype (hoping a certain crypto-currency will stay popular), or on war (politicians will generally send their soldiers to war to defend a government-issued currency when the power of the government is at risk), or on citizen-paid taxes (often used to bail out failing banks). LedgerLoops avoids this reliance on globally defined tokens, which makes it a much more decentralized technology. Any group of people can start to use the LedgerLoops protocol within their community, without relying on the health of a globally defined currency or on the health of a global network. If a hype of activity in LedgerLoops transaction rises and falls in some local geographic area, this has very little effect on the ability of people in another geographic area to use the LedgerLoops protocol. That being said, of course, communities would benefit from connecting with another community, and this would automatically happen if a few users form part of both communities. This network effect is very similar to how the internet works ("Connectivity is its own Reward").
 
 \subsection{Starting to use LedgerLoops}
-First of all, let me state that version 0.6 of LedgerLoops should be considered a developer preview, and further development will most likely be needed before the protocol is production-ready. Until we gain a better understanding of the network dynamics in more complex topologies, its use is only recommended for academic experiments, not for real-world trade. Users are advised to only trade very small assets, for instance up to 1 USD, since we can't yet predict what dynamics would arise, and what other security considerations may be discovered during such initial experiments.
+First of all, let me state that version 0.7 of LedgerLoops should be considered a developer preview, and further development will most likely be needed before the protocol is production-ready. Until we gain a better understanding of the network dynamics in more complex topologies, its use is only recommended for academic experiments, not for real-world trade. Users are advised to only trade very small assets, for instance up to 1 USD, since we can't yet predict what dynamics would arise, and what other security considerations may be discovered during such initial experiments.
 
-Also, the current version of the software used on the demo page is not recommended for production; I probably need to rewrite it from scratch, using what I learned in the last few weeks developing this version 0.6 of LedgerLoops. Importantly, the code has also not been reviewed by a security expert yet, so it's not unlikely that this implementation contains a few vulnerabilities; in short, please only use it to run simulations, don't entrust it with data about your real-world trade peers yet.
+Also, the current version of the software used on the demo page is not recommended for production; I probably need to rewrite it from scratch, using what I learned in the last few weeks developing this version 0.7 of LedgerLoops. Importantly, the code has also not been reviewed by a security expert yet, so it's not unlikely that this implementation contains a few vulnerabilities; in short, please only use it to run simulations, don't entrust it with data about your real-world trade peers yet.
 
 One path to start using LedgerLoops in the real world, would be to develop an Android app which can access a smartphone's addressbook, and use the API of an existing end-to-end encrypted messaging platform for delivering the LedgerLoops messages to the user's neighbors. This would require a potential user to convince their real-world trade peers to install the same app, which would be impractical for casual one-time trade peers, but could work well for, for instance, people who share a house, or for the members of a sports club (where the administration of membership fees could be a driving use case).
 
