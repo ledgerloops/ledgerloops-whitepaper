@@ -260,13 +260,13 @@ Before finding a loop along which assets can move around, the first step of the 
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "local-ledgers-0.2",
-  "msgType": "initiate-update",
+  "protocol": "ledgerloops-0.7",
+  "msgType": "initiate-ledger-append",
   "transactionId": "<a unique string>",
-  "note": "<a description of why this IOU is being sent>,
-  "debtor": "<identifier of the sender; just a nickname>",
+  "note": "<a description of why this entry is added>,
+  "debtor": "<identifies debtor; just a nickname>",
   "addedDebts": {
-    "unit": amount, // for instance "USD": 10,
+    "unit": amount, // for instance "UCR": 10,
   },
 }
 \end{lstlisting}}
@@ -275,9 +275,9 @@ Even if the communication network is reliable and would detect network outages w
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "local-ledgers-0.2",
-  "msgType": "confirm-update",
-  "transactionId": "<same as in initiate-update message>",
+  "protocol": "ledgerloops-0.7",
+  "msgType": "confirm-ledger-append",
+  "transactionId": "<same as in initiate-ledger-append message>",
 }
 \end{lstlisting}}
 
@@ -308,10 +308,9 @@ A node can send its "I'm not on a cycle" message in error or while lying on purp
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ddcd-dfs-0.2",
-  "msgType": "update-status",
-  "value": "<true iff sending node might be on cycle>",
-  "isReply": "<true iff this message is a reply>",
+  "protocol": "ddcd-dfs-0.3",
+  "msgType": "probe",
+  "routeId": "<a long unique string>",
 }
 \end{lstlisting}}
 
@@ -319,10 +318,19 @@ Once the search space has been reduced using this 'Dynamic DCD' algorithm, depth
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ddcd-dfs-0.2",
-  "msgType": "probe",
-  "treeToken": "<a long string>",
-  "pathToken": "<a long string>",
+  "protocol": "ddcd-dfs-0.3",
+  "msgType": "not-routable",
+  "routeId": "<string from the probe message>",
+}
+\end{lstlisting}}
+
+Or, if it met the start of another route, periodically send:
+
+\vbox{\begin{lstlisting}
+{
+  "protocol": "ddcd-dfs-0.3",
+  "msgType": "still-pending",
+  "routeId": "<string from the probe message>",
 }
 \end{lstlisting}}
 
@@ -339,21 +347,29 @@ The initiator generates a random string and calculates its SHA-256 hash value. I
 \vbox{\begin{lstlisting}
 {
   "protocol": "ledgerloops-0.7",
+  "msgType": "debt-definition",
+  "id": "<long string, referred to in subsequent messages>",
+  "unit": "currency, service or asset",
+  "amount": "<number of units offered>",
+}
+\end{lstlisting}}
+
+\vbox{\begin{lstlisting}
+{
+  "protocol": "ledgerloops-0.7",
   "msgType": "conditional-promise",
-  "transaction": {
-    "id": "<a newly generated unique string>",
-    "unit": "<something the sender has to offer>",
-    "amount": "<number of units offered>",
+  "id": "<long string, referred to in subsequent messages>",
+  "debtId": "<id from debt-definition>",
+  "valueEstimate": {
+    "unit": "UCR",
+    "amount": "<number of unicurns estimated value of the offer>",
   },
   "challenge": {
-    "function": "SHA-256",
-    "hash": "<hash value in base64 format>",
+    "type": "hash-challenge",
+    "function": "sha-0.1",
+    "hash": "<hash value in hex format>",
   },
-  "routing": {
-    "protocol": "ddcd-dfs-0.2",
-    "treeToken": "<the treeToken of detected loop>",
-    "pathToken": "<the pathToken that looped back>",
-  },
+  "routeId": "<from routing phase>",
 }
 \end{lstlisting}}
 
@@ -383,7 +399,7 @@ details which he created, he solves the challenge, and the solution to the chall
 {
   "protocol": "ledgerloops-0.7",
   "msgType": "satisfy-condition",
-  "transactionId": "<transaction.id from earlier>",
+  "conditionalPromiseId": "<id from conditional-promise>",
   "solution": "<original random string in base64 format>",
 }
 \end{lstlisting}}
@@ -399,7 +415,7 @@ by sending this messages behind it:
 {
   "protocol": "ledgerloops-0.7",
   "msgType": "please-reject",
-  "transactionId": "<transaction.id from earlier>",
+  "conditionalPromiseId": "<id from conditional-promise>",
 }
 \end{lstlisting}}
 
@@ -412,7 +428,7 @@ To reject the cryptographically-triggered IOU you received earlier, use this mes
 {
   "protocol": "ledgerloops-0.7",
   "msgType": "reject",
-  "transactionId": "<transaction.id from earlier>",
+  "conditionalPromiseId": "<id from conditional-promise>",
 }
 \end{lstlisting}}
 
