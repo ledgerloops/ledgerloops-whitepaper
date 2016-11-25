@@ -41,16 +41,16 @@
 \lstset{language=json}
 
 \begin{document}
-\title{{\em Ledger Loops}: Using cryptographically triggered IOUs to make the world go round.}
+\title{{\em Ledger Loops}: Using cryptographic triggers to make the world go round.}
 \author{Michiel B. de Jong}
 \date{November 2016}
 \maketitle
 \begin{abstract}
-LedgerLoops is a novel financial technology. Ra\-ther than a cryp\-to-cur\-ren\-cy or new form of mo\-ney, it is better viewed as an alternative to money. At its core is the concept of {\em cryptographically triggered IOUs}.
+LedgerLoops is a novel financial technology. Ra\-ther than a cryp\-to-cur\-ren\-cy or new form of mo\-ney, it is better viewed as an alternative to money. At its core is the concept of {\em cryptographic triggers}.
 
 In this whitepaper, the Whispering Merchants problem serves as a simplified abstraction of economic exchange in general, where assets flow in loops. Traditionally, money would flow in the opposite direction, thus solving the coordination problem by effectively reducing the loop to a chain of one-to-one transactions. But money has a number of downsides, mainly due to the need to trust people other than your direct economical neighbors. Value fluctuations in a currency act as a single point of failure, which can have devastating effects on economic trade. LedgerLoops aims to allow assets to move around, while every trader only needs to trusts their own direct peers.
 
-LedgerLoops is a novel solution to the Whispering Merchants problem, based on cryptographically triggering each local IOU, ra\-ther than mo\-ving some sort of currency around the circle of merchants in the opposite direction.
+LedgerLoops is a novel solution to the Whispering Merchants problem, based on a cryptographic trigger which activates each local IOU, ra\-ther than mo\-ving some sort of currency around the circle of merchants in the opposite direction.
 \end{abstract}
 
 \section{The Whispering Merchants Problem}
@@ -232,13 +232,15 @@ What makes the Whispering Merchants problem hard is that for instance in this ex
 
 The LedgerLoops website (https://ledgerloops.com) contains a discussion of various money systems, none of which satisfy the requirement that each participants only trusts their own immediate neighbors.
 
-\section{Cryptographically Triggered IOUs}
-This whitepaper proposes a solution to the Whispering Merchants problem, called LedgerLoops. It is based on cryptographically triggered IOUs.
+\section{Crypto-triggers}
+This whitepaper proposes a solution to the Whispering Merchants problem, called LedgerLoops. It is based on cryptographic triggers ('crypto-triggers' for short).
+
+A crypto-trigger consists of two parts: a challenge and a solution. The challenge can be included as a condition in contracts. Once the solution has been made public, all contracts are activated.
 
 An IOU (short for "I owe you") is a message or document representing a debt.
 A cryptographically triggered IOU contains the same data as a standard IOU (debtor, beneficiary, asset owed, etc.), plus a cryptographic challenge.
 
-The IOU is without value until the beneficiary presents a valid solution to the challenge. In the current version of the LedgerLoops protocol, the cryptographic challenge is defined by the SHA-256 hash of a random string; the challenge is simply to find the string (or more precisely, {\i a} string) that has the hash value from the challenge. Only the person holding the original string will be able to do this, yet everybody can easily verify and agree if a solution to the challenge is valid or not. If you know of a better type of challenge scheme, then please comment here:
+The IOU is without value until the beneficiary presents a valid solution to the challenge. In the current version of the LedgerLoops protocol, the cryptographic challenge is defined by the SHA-256 hash of a random string; the challenge is simply to find the string (or more precisely, {\i a} string) that has the hash value from the challenge. Only the person holding the original string will be able to do this, yet everybody can easily verify and agree if a given candiate solution to the challenge is valid or not. If you know of a better type of challenge scheme than SHA-256, then please comment here:
 
 https://github.com/ledgerloops/ledgerloops-whitepaper/issues/1
 
@@ -251,10 +253,10 @@ Once the initiator receives a cryptographically triggered IOU from his own right
 Since the challenge used in all cryptographically triggered IOUs was the same one for all trades along the loop, the solution to this challenge acts as a cryptographic trigger, but its meaning is different from the meaning of a cryptographic coin: it represents no value, it only represents a "Go!" signal which all participants recognize. Therefore, LedgerLoops should be considered an alternative to money, rather than an alternative form of money.
 
 \section{The LedgerLoops Protocol (version 0.7)}
-In the last few weeks, I have implemented a few design iterations of the LedgerLoops protocol. Future versions are likely to differ from this, but let me describe roughly how it currently works.
+In the last few weeks, I have implemented a few design iterations of the LedgerLoops protocol. Future versions are likely to differ from this, but let me describe roughly how the current version works.
 
 \subsection{Peer-to-peer Ledgers}
-As Graeber noted in his book "Debt: the first 5,000 years" ~\cite{Graeber2011}, peer-to-peer debt is useful for time-skewed barter between two peers; I give you something now, and you give me something in exchange tomorrow; in the meantime, a debt exists. This is why LedgerLoops is based on peer-to-peer ledgers (that is, ledgers on which two people keep track of what they owe each other).
+As Graeber noted in his book "Debt: the first 5,000 years" ~\cite{Graeber2011}, peer-to-peer debt is useful for (in my words) time-skewed barter between two peers: I give you something now, and you give me something in exchange tomorrow; in the meantime, a debt exists. This is why LedgerLoops is based on peer-to-peer ledgers (that is, ledgers on which two people keep track of what they owe each other).
 
 Before finding a loop along which assets can move around, the first step of the algorithm consists of agents building up a ledger with each of their neighbors in the graph, by sending each other standard, unconditional IOUs, of the following format:
 
@@ -262,14 +264,19 @@ Before finding a loop along which assets can move around, the first step of the 
 {
   "protocol": "ledgerloops-0.7",
   "msgType": "initiate-ledger-append",
-  "transactionId": "<a unique string>",
+  "previousHash": "<the ledger head's hash, or null first time>",
+  "hash": "<see below for calculation>",
   "note": "<a description of why this entry is added>,
   "debtor": "<identifies debtor; just a nickname>",
   "addedDebts": {
-    "unit": amount, // for instance "UCR": 10,
+    "unit1": amount1, // for instance "USD": 10,
+    "unit2": amount2, // for instance "EUR": -8,
+    ...,
   },
 }
 \end{lstlisting}}
+
+The hash is the SHA-256 hash of the alphabetically sorted UTF-8 JSON representation of the object containing just the previousHash, note, debtor, and addedDebts fields (not the protocol, msgType and hash fields).
 
 Even if the communication network is reliable and would detect network outages without losing any messages, a malfunction in the receiver's software could make it look like this message was received successfully when in fact it was not, so to confirm receipt, the recipient replies with:
 
@@ -277,15 +284,18 @@ Even if the communication network is reliable and would detect network outages w
 {
   "protocol": "ledgerloops-0.7",
   "msgType": "confirm-ledger-append",
-  "transactionId": "<same as in initiate-ledger-append message>",
+  "hash": "<same as in initiate-ledger-append message>",
 }
 \end{lstlisting}}
 
-So in the current implementation, the exchange of assets is done asynchronously, creating debts on local ledgers, which then get fed into the cycle detection and settlement algorithm. Each participant will be happy if they can exchange one of their incoming debts against one of their outgoing debt, since the balance of each debt will go down, thereby minimizing their exposure to credit risk and enabling new trades to take place.
+As soon as the 'confirm-ledger-append' message has been sent, both peers update their copy of the ledger by appending this one entry.
+So in the current implementation, LedgerLoops coordination is used to create or cancel debts, not directly to trigger the movement of assets. Each participant will be happy if they can exchange one of their incoming debts against one of their outgoing debt, since the balance of each debt will go down, thereby minimizing their exposure to credit risk and enabling new trades to take place. Also, peers can offer goods first, and only if a loop is found, commit to actually owing the delivery of these goods.
 
 \subsection{Routing}
 
-Finding cycles in a graph of which no one has a bird's eye view is an interesting computer science problem. Recently, 'Distributed Cycle Detection and Removal' ~\cite{Oliva2016} was included in a non-free IEEE publication. Unfortunately, due to the scientific journal's policy, no public version of the algorithm is available yet (you can buy the article from the IEEE website), but I can try to explain it in my own words:
+The Whispering Merchants problem is a best-case scenario for using LedgerLoops, since all merchants have exactly one in-neighbor (their right neighbor who offers an asset) and one out-neighbor (their left neighbor, to whom they offer an asset). In a real economy, asset offers could form any directed graph between agents, and agents should first cooperate to detect if any cycles actually exist.
+
+Finding cycles in a graph of which no one has a bird's eye view is an interesting computer science problem. Recently, 'Distributed Cycle Detection and Removal' ~\cite{Oliva2016} ('DCD') was included in a non-free IEEE publication. Unfortunately, due to the scientific journal's policy, no public version of the algorithm is available yet (you can buy the article from the IEEE website), but I can try to explain it in my own words:
 
 \begin{itemize}
 \item each leaf node (one that has either only in-neighbors or only out-neighbors), goes into 'deactivated' mode, and initiates a bread-first wave of messages through the network; from the point of view of each node, these messages mean as much as "I am sure I'm not part of a cycle".
@@ -293,19 +303,26 @@ Finding cycles in a graph of which no one has a bird's eye view is an interestin
 \item after waiting long enough, nodes that have not deactivated yet, can know that they are either on a cycle, or on a path from one cycle to another. At least, nodes that want to start a depth-first search for cycles, can now discard all neighbors from whom they receive such a message, and drastically reduce their search space.
 \end{itemize}
 
-I adapted this algorithm slightly to make it work in graphs whose topology can change while the algorithm is running. At first, if a node has no neighbors in the debt graph, it is created in deactivated mode.
+This algorithm is more decentralized than Rocha-Thatte. Another simple algorithm would be to forward tokens from node to node, along a depth-first search ('DFS'), until a back-edge is found.
+
+I adapted the DCD algorithm algorithm slightly and sort of combined it with DFS to make it work in graphs whose topology can change while the algorithm is running. I called this algorithm 'DDCD-DFS', an implementation in node.js is underway. It works roughly as follows (this is not a complete description yet, as I'm still working out how to deal with each edge case):
+
+At first, if a node has no neighbors in the debt graph, it is created in deactivated mode.
 
 \begin{itemize}
-\item When a debt link is added, the nodes connected by the link both send out a breadth-first wave of messages meaning "I might be part of a cycle".
-\item These messages travel to the leafs of the net\-work, where they bounce back and be\-come re\-ply mes\-sa\-ges that mean "No cy\-cles here".
-\item Like in the original DCD algorithm, a node deactivates if it has received a "No" from either all out-neighbors or all in-neighbors, and then sends the "No cycles here" message on forward breadth-first, in its direction of travel.
-\item Nodes also deactivate as necessary when links disappear from the network.
+\item When a link is added, a routeId is assigned to it.
+\item The node after the link sends a probe message to one of its out-neighbors.
+\item The node that receives this message forwards it to one of its own out-neighbors.
+\item If the probe reaches a node with no out-neighbors, that node sends back a "No" message.
+\item If a "No" message is received, a new probe is started and sent to one of the siblings of the out-neighbor that sent the "No" message. Also, a "Pending" message is sent back to the in-neighbor from which the original probe came.
+\item If a "Pending" message is received, it is propagated back to the in-neighbor from which the original probe came.
+\item If the node that started the probe receives a "Pending" message, it marks that out-neighbor as pending, and notes down the timestamp.
+\item If a known routeId is received from an in-neighbor, that's a cycle.
 \end{itemize}
 
-As a special remedy against race conditions, when an internal node has already been activated, and then gets another positive "I might be part of a cycle" from a neighbor, it does not forward that message (since its state does not change, so there's no news to report). This means that this second message dies at this internal node, and does not get a chance to bounce against the leaf nodes at the edge of the network. The naive solution for this would be to wait for the first message to come back (either bouncing against leaves, or cycling around), but if a cycle is created by adding a lot of new links at almost the same time, a race condition can occur where both messages get suppressed along the way. Therefore, the internal node that suppresses the second message gives back a positive reply in this special case.
+A node can send "No" messages in error or while lying on purpose - when this happens, this messages more precisely means "I'm not on a cycle of nodes that cooperate correctly". A "Pending" message sent in error or maliciously is not semantically incorrect in its meaning, because it just means a cycle "might" exist. It could distract nodes from real cycles, but it would be up to the first non-malicious and non-malfunctioning node to distrust, deprioritize, or unfriend a neighbor who sends a lot of distracting messages. This is an area for further research.
 
-A node can send its "I'm not on a cycle" message in error or while lying on purpose - when this happens, this messages more precisely means "I'm not on a cycle of nodes that cooperate correctly". An "I might be on a cycle" message sent in error or maliciously is not semantically incorrect in its meaning, because of the "might" verb used. It could distract nodes from real cycles, but it would be up to the first non-malicious and non-malfunctioning node to distrust, deprioritize, or unfriend a neighbor who sends a lot of distracting messages. This is an area for further research.
-
+The message formats exchanged are as follows. For sending the probes:
 \vbox{\begin{lstlisting}
 {
   "protocol": "ddcd-dfs-0.3",
@@ -314,7 +331,7 @@ A node can send its "I'm not on a cycle" message in error or while lying on purp
 }
 \end{lstlisting}}
 
-Once the search space has been reduced using this 'Dynamic DCD' algorithm, depth-first-search (DFS) is used to find actual cycles. To start a DFS tree, generate a treeToken and a pathToken, two strings that are long enough to be hard to guess. Send the following message to one of your out-neighbors:
+For replying "No":
 
 \vbox{\begin{lstlisting}
 {
@@ -324,7 +341,7 @@ Once the search space has been reduced using this 'Dynamic DCD' algorithm, depth
 }
 \end{lstlisting}}
 
-Or, if it met the start of another route, periodically send:
+For replying "Pending":
 
 \vbox{\begin{lstlisting}
 {
@@ -334,15 +351,11 @@ Or, if it met the start of another route, periodically send:
 }
 \end{lstlisting}}
 
-Each node forwards this message to one of their out-neighbors, until it reaches a leaf node. It is then backtracked to the last internal node which has more than one out-neighbor. This node generates a new pathToken but keeps the treeToken as it is, and sends the altered message to their next out-neighbor, until they also need to backtrack.
-
-The pathTokens which are included in addition to treeTokens are refreshed after each backtrack step, to avoid the full probe details from leaking to nodes that did not participate in the cycle which the probe finds; each node can remember what the last out-neighbor was they sent this treeToken to. However, a node may decide that its out-neighbor is unreachable, and after some timeout continue trying with the next sibling. Once this happens, it would be possible to find multiple cycles on one treeToken (but they would then have different pathTokens).
-
-If the probe reaches a node which it has already visited, this node has discovered a cycle, and can try to become the initiator of a LedgerLoop.
+The "Pending" messages may need to be repeated periodically, to deal with nodes that are not always connected.
 
 \subsection{Cryptographically triggered IOUs}
 
-The initiator generates a random string and calculates its SHA-256 hash value. It then sends the following message to the out-neighbor to which it sent the treeToken that looped around:
+The initiator generates a random string and calculates its SHA-256 hash value. It then sends the following message to the out-neighbor to which it sent the routeId that looped around:
 
 \vbox{\begin{lstlisting}
 {
@@ -366,16 +379,18 @@ The initiator generates a random string and calculates its SHA-256 hash value. I
   },
   "challenge": {
     "type": "hash-challenge",
-    "function": "sha-0.1",
+    "function": "sha-256",
     "hash": "<hash value in hex format>",
   },
   "routeId": "<from routing phase>",
 }
 \end{lstlisting}}
 
+The Unicurn ("UNIversal CUrrency RefereNce" / "UCR") is defined relative to a trade-weighted basket of reference currencies, see https://unicurn.com (I'm still working on defining this).
+
 Note that a sender can offer parts of a specific asset, even if the asset is a physical item that cannot be split into parts.
 For instance, I could send you 10 IOUs, each referring to the blue bicycle I showed you as the "unit", and each for an amount of 0.1.
-It is important to use transaction IDs only once, so that it is clear which IOU is being triggered, and this is also tracked
+It is important to use each debt-definition only once, so that it is clear which IOU is being triggered, and this is also tracked
 correctly in our peer-to-peer ledger afterwards. As soon as I owe you 10 times one tenth of the blue bicycle, you can claim the
 entire bicycle. You could also claim the bicycle after I owe you only 8 tenths of it, after which you would owe me the equivalent
 of 2 tenths of the blue bicycle. This requires a more long-term form of trust between us than one-off trades of entire assets or
@@ -385,12 +400,10 @@ For the conditional-promise I send you, it only matters that we agree on what th
 used as money, this unit of value does not need to have any meaning to anyone apart from the two peers who discuss it.
 
 Each participant reuses the 'challenge' part of the con\-di\-tio\-nal-pro\-mise they receive, and creates a new conditional promise, mentioning
-a different unit of value and amount, depending on the asset they want to offer their peer in this cryptographically triggered IOU.
+a different debtId, depending on the asset they want to offer their peer in this cryptographically triggered IOU. The valueEstimate should be
+the same though, because the initiator will not be willing to trigger the loop if the valueEstimate was decreased along the way.
 
-The current version of the protocol does not yet allow participants to negotiate exchange rates in any meaningful way.
-If one of the participants offers an
-amount of asset that is clearly worth less than the amount of asset he received (attempting to make a profit on this trade), then somewhere
-else in the loop, another participant (probably the initiator) will be offered an unattractive trade, and will refuse.
+For now, the Unicurn is the only unit of value allowed for value estimates in conditional-promise messages.
 
 Once a conditional-promise message reaches the initiator, describing the unit of value the initiator desires, and promising an amount which the initiator finds acceptable compared to the amount of asset he offered when starting the loop, trade becomes possible. The initiator confirms that the incoming conditional-promise message uses the same challenge
 details which he created, he solves the challenge, and the solution to the challenge is sent round in the opposite direction:
