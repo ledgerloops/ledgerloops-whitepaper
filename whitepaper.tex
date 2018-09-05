@@ -41,7 +41,7 @@
 \lstset{language=json}
 
 \begin{document}
-\title{{\em Ledger Loops}: Hashlocks make the world go round.}
+\title{{\em Ledger Loops}: Hashlocked IOUs make the world go round.}
 \author{Michiel B. de Jong}
 \date{September 2018}
 \maketitle
@@ -254,28 +254,26 @@ What makes the Whispering Merchants problem hard is that for instance in this ex
 
 The LedgerLoops website (https://ledgerloops.com) contains a discussion of various money systems, none of which satisfy the requirement that each participants only trusts their own immediate neighbors.
 
-\section{Crypto-triggers}
-This whitepaper proposes a solution to the Whispering Merchants problem, called LedgerLoops. It is based on cryptographic triggers ('crypto-triggers' for short).
+\section{Hashlocks}
+This whitepaper proposes a solution to the Whispering Merchants problem, called LedgerLoops. It is based on cryptographic triggers ('hashlocks').
 
-A crypto-trigger consists of two parts: a challenge and a solution. The challenge can be included as a condition in contracts. Once the solution has been made public, all contracts are activated.
+A hashlock consists of two parts: a challenge and a solution. The challenge can be included as a condition in contracts. Once the solution has been made public, all contracts are activated.
 
 An IOU (short for "I owe you") is a message or document representing a debt.
-A cryptographically triggered IOU contains the same data as a standard IOU (debtor, beneficiary, asset owed, etc.), plus a cryptographic challenge.
+A hashlocked IOU contains the same data as a standard IOU (debtor, beneficiary, asset owed, etc.), plus a hashlock challenge.
 
-The IOU is without value until the beneficiary presents a valid solution to the challenge. In the current version of the LedgerLoops protocol, the cryptographic challenge is defined by the SHA-256 hash of a random string; the challenge is simply to find the string (or more precisely, {\i a} string) that has the hash value from the challenge. Only the person holding the original string will be able to do this, yet everybody can easily verify and agree if a given candiate solution to the challenge is valid or not. If you know of a better type of challenge scheme than SHA-256, then please comment here:
+The IOU is without value until the beneficiary presents a solution of the hashlock. In the current version of the LedgerLoops protocol, the hashlock challenge is defined by the SHA-256 hash of a random string; the challenge is simply to find the string (or more precisely, {\i a} string) that has the hash value from the challenge. Only the person holding the original string will be able to do this, yet everybody can easily verify and agree if a given candiate solution to the challenge is valid or not.
 
-https://github.com/ledgerloops/ledgerloops-whitepaper/issues/1
+The Whispering Merchants can use hashlocked IOUs as follows to facilitate their trade. One merchant creates a hashlock by picking a 256-bit string at random (the solution, which they keep secret) and calculating its SHA-256 hash value (the challenge, which is included as the condition in hashlocked IOU contracts). The identity of this initiator stays obfuscated. Remember all merchants are willing to give their asset to their clockwise neighbor, but only if they can be sure that their own anti-clockwise neighbor will do the same.
 
-The Whispering Merchants can use cryptographically triggered IOUs as follows to facilitate their trade. One merchant creates a cryptographic challenge. The identity of this initiator stays obfuscated. Remember all merchants are willing to give their asset to their left neighbor, but only if they can be sure that their own right neighbor will do the same.
+The initiator gives a hashlocked IOU to his clockwise neighbor, for the item he wants to offer. Each next clockwise neighbor does the same. The details of the hashlock challenge are reused each time, but the item offered is different in each locally created IOU.
 
-The initiator gives a cryptographically triggered IOU to his left neighbor, for the item he wants to offer. Each next left neighbor does the same. The details of the challenge are reused each time, but the item offered is different in each locally created IOU.
+Once the initiator receives a hashlocked IOU from his own anti-clockwise neighbor, for the item he wants to receive, he presents the solution (now made public for the first time) to his anti-clockwise neighbor. Each next anti-clockwise neighbor now gives the asset they offered in exchange for the solution to the challenge.
 
-Once the initiator receives a cryptographically triggered IOU from his own right neighbor, for the item he wants to receive, he solves the challenge and presents the solution to his right neighbor. Each next right neighbor now gives the asset they offered in exchange for the solution to the challenge.
+Since the challenge used in all hashlocked IOUs was the same one for all trades along the loop, the solution to this challenge acts as a cryptographic trigger, but its meaning is different from the meaning of a cryptographic coin: it represents no value, it only represents a "Go!" signal which all participants recognize. Therefore, LedgerLoops should be considered an alternative to money, rather than an alternative form of money.
 
-Since the challenge used in all cryptographically triggered IOUs was the same one for all trades along the loop, the solution to this challenge acts as a cryptographic trigger, but its meaning is different from the meaning of a cryptographic coin: it represents no value, it only represents a "Go!" signal which all participants recognize. Therefore, LedgerLoops should be considered an alternative to money, rather than an alternative form of money.
-
-\section{The LedgerLoops Protocol (version 0.7)}
-In the last few weeks, I have implemented a few design iterations of the LedgerLoops protocol. Future versions are likely to differ from this, but let me describe roughly how the current version works.
+\section{The LedgerLoops Protocol (version 0.8)}
+In 2016, I have implemented a few design iterations of the LedgerLoops protocol. Future versions are likely to differ from this, but let me describe roughly how the current version works.
 
 \subsection{Peer-to-peer Ledgers}
 As Graeber noted in his book "Debt: the first 5,000 years" ~\cite{Graeber2011}, peer-to-peer debt is useful for (in my words) time-skewed barter between two peers: I give you something now, and you give me something in exchange tomorrow; in the meantime, a debt exists. This is why LedgerLoops is based on peer-to-peer ledgers (that is, ledgers on which two people keep track of what they owe each other).
@@ -315,7 +313,7 @@ So in the current implementation, LedgerLoops coordination is used to create or 
 
 \subsection{Routing}
 
-The Whispering Merchants problem is a best-case scenario for using LedgerLoops, since all merchants have exactly one in-neighbor (their right neighbor who offers an asset) and one out-neighbor (their left neighbor, to whom they offer an asset). In a real economy, asset offers could form any directed graph between agents, and agents should first cooperate to detect if any cycles actually exist.
+The Whispering Merchants problem is a best-case scenario for using LedgerLoops, since all merchants have exactly one in-neighbor (their anti-clockwise neighbor who offers an asset) and one out-neighbor (their clockwise neighbor, to whom they offer an asset). In a real economy, asset offers could form any directed graph between agents, and agents should first cooperate to detect if any cycles actually exist.
 
 Finding cycles in a graph of which no one has a bird's eye view is an interesting computer science problem. Recently, 'Distributed Cycle Detection and Removal' ~\cite{Oliva2016} ('DCD') was included in a non-free IEEE publication. Unfortunately, due to the scientific journal's policy, no public version of the algorithm is available yet (you can buy the article from the IEEE website), but I can try to explain it in my own words:
 
@@ -583,7 +581,7 @@ Users should not rely on their LedgerLoops app as the only record of their credi
 \section{Roadmap}
 The current version of the LedgerLoops protocol still lacks a few features. 
 
-A LedgerLoops app could allow the user to define minimal exchange rates for pairs of assets the neighbor owes and is owed. The danger in this is that every candidate participant in a loop would try to make a profit, and the asset which the initiator is offered by their right neighbor would be worth much less than the asset the initiator offered for trade in the beginning. This brings the candidate participants into a sort of prisoner's dilemma: they should all try to make reasonable trade offers, otherwise no agreement will be reached, and nobody can trade. On the other hand, when agreement is reached, each participant could feel like they might have been able to negotiate a better deal if they would have negotiated a bit harder. This is a reality in all economic trade, but allowing it to occur in LedgerLoops negotiations will probably require more messages to be passed before a participants agree on a loop, and these extra messages may expose more information about each participant than in the current version of the protocol.
+A LedgerLoops app could allow the user to define minimal exchange rates for pairs of assets the neighbor owes and is owed. The danger in this is that every candidate participant in a loop would try to make a profit, and the asset which the initiator is offered by their anti-clockwise neighbor would be worth much less than the asset the initiator offered for trade in the beginning. This brings the candidate participants into a sort of prisoner's dilemma: they should all try to make reasonable trade offers, otherwise no agreement will be reached, and nobody can trade. On the other hand, when agreement is reached, each participant could feel like they might have been able to negotiate a better deal if they would have negotiated a bit harder. This is a reality in all economic trade, but allowing it to occur in LedgerLoops negotiations will probably require more messages to be passed before a participants agree on a loop, and these extra messages may expose more information about each participant than in the current version of the protocol.
 
 Finally, the current version of the protocol is limited to each participant trading part of one of their credits against part of one of their debts. In practice, it may be attractive for a user to exchange a partial reduction of debt at one creditor against an increase of debt at another creditor, or to exchange an increase of credit at one debtor for a decrease of credit at another debtor. This would require a change in the routing algorithm, since this makes every debtor and every creditor both a potential in-neighbor and a potential out-neighbor. The app would then probably allow users to indicate in more detail which creditors and which debtors they prefer over others (for instance, a user would typically prefer to have a credit at a neighbor they trust more, or with whom they have closer or more frequent real-world contact).
 
