@@ -41,20 +41,20 @@
 \lstset{language=json}
 
 \begin{document}
-\title{{\em Ledger Loops}: Using cryptographic triggers to make the world go round.}
+\title{{\em Ledger Loops}: Hashlocks make the world go round.}
 \author{Michiel B. de Jong}
-\date{November 2016}
+\date{September 2018}
 \maketitle
 \begin{abstract}
-LedgerLoops is a novel financial technology. Ra\-ther than a cryp\-to-cur\-ren\-cy or new form of mo\-ney, it is better viewed as an alternative to money. At its core is the concept of {\em cryptographic triggers}.
+LedgerLoops is a novel financial technology. Ra\-ther than a cryp\-to-cur\-ren\-cy or new form of mo\-ney, it is better viewed as an alternative to money. At its core is the concept of {\em hashlocks}.
 
 In this whitepaper, the Whispering Merchants problem serves as a simplified abstraction of economic exchange in general, where assets flow in loops. Traditionally, money would flow in the opposite direction, thus solving the coordination problem by effectively reducing the loop to a chain of one-to-one transactions. But money has a number of downsides, mainly due to the need to trust people other than your direct economical neighbors. Value fluctuations in a currency act as a single point of failure, which can have devastating effects on economic trade. LedgerLoops aims to allow assets to move around, while every trader only needs to trusts their own direct peers.
 
-LedgerLoops is a novel solution to the Whispering Merchants problem, based on a cryptographic trigger which activates each local IOU, ra\-ther than mo\-ving some sort of currency around the circle of merchants in the opposite direction.
+LedgerLoops is a novel solution to the Whispering Merchants problem, based on a cryptographic trigger (hashlock) which activates each local IOU, ra\-ther than mo\-ving some sort of currency around the circle of merchants in the opposite direction.
 \end{abstract}
 
 \section{The Whispering Merchants Problem}
-In the Whispering Merchants problem, merchants sit in a circle, facing outward. Each merchant can only communicate with their two direct neighbors in the circle. Each merchant wants to offer an asset to their left neighbor, and obtain an asset from their right neighbor. Each merchant trusts their immediate neighbors to keep any promises they make, but they do not trust anyone else (thus excluding fiat money as an option), nor are they interested in any other asset than the item offered by their right neighbor (thus excluding commodity money). The problem exists in achieving cooperation between the merchants so that all assets move one merchant to the left.
+In the Whispering Merchants problem, merchants sit in a circle, facing outward. Each merchant can only communicate with their two direct neighbors in the circle. Each merchant wants to offer an asset to their clockwise neighbor, and obtain an asset from anti-clockwise neighbor. Each merchant trusts their immediate neighbors to keep any promises they make, but they do not trust anyone else (thus excluding fiat money as an option), nor are they interested in any other asset than the item offered by their anti-clockwise neighbor (thus excluding commodity money). The problem exists in achieving cooperation between the merchants so that all assets move clockwise by one merchant.
 
 To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitting in a circle, facing outward.
 
@@ -62,27 +62,32 @@ To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitt
 \begin{tikzpicture}
 \draw [fill=brown] (0.5, 0.5) circle [radius=0.2];
 
-\draw[->,red,ultra thick] (0.9,1) --(0.1,1);
+\draw[->,red,ultra thick] (0,0.1) --(0,0.9);
 \draw [fill=black] (0,1) circle [radius=0.1];
 \node[above left] at (0,1) {$Abraham$};
 
-\draw[->,yellow,ultra thick] (0,0.9) --(0,0.1);
-\draw [fill=black] (0, 0) circle [radius=0.1];
-\node[below left] at (0,0) {$Bethany$};
+\draw[->,yellow,ultra thick] (0.1,1) --(0.9,1);
+\draw [fill=black] (1, 1) circle [radius=0.1];
+\node[below left] at (1,1) {$Bethany$};
 
-\draw[->,orange,ultra thick] (0.1,0) --(0.9,0);
+\draw[->,orange,ultra thick] (1,0.9) --(1,0.1);
 \draw [fill=black] (1,0) circle [radius=0.1];
 \node[below right] at (1,0) {$Chad$};
 
-\draw[->,green,ultra thick] (1,0.1) --(1,0.9);
-\draw [fill=black] (1, 1) circle [radius=0.1];
-\node[above right] at (1,1) {$Dorus$};
+\draw[->,green,ultra thick] (0.9,0) --(0.1,0);
+\draw [fill=black] (0, 0) circle [radius=0.1];
+\node[above right] at (0,0) {$Dorus$};
 \end{tikzpicture}
 \caption{Abraham has a \textbf{\color{yellow} Banana} to offer Bethany. Bethany has a \textbf{\color{orange} Carrot} for Chad. Chad has a \textbf{\color{green} Durian} for Dorus. Dorus, in turn, has an \textbf{\color{red} Apple} to offer, in which Abraham is interested.}
 \end{figure}
 
 \begin{figure}
 \begin{tikzpicture}
+Abraham: 0,1
+Bethany: 0,0 -> 1,1
+Chad: 1,0
+Dorus: 1,1 -> 0,0
+
 \draw [black] (1.3, 0.5) circle [radius=0.5];
 \draw [black] (0.5, 1.3) circle [radius=0.5];
 \draw [black] (0.5, -0.3) circle [radius=0.5];
@@ -93,21 +98,21 @@ To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitt
 
 \draw [fill=brown] (0.5, 0.5) circle [radius=0.2];
 
-\draw[->,red,ultra thick] (0.9,1.2) --(0.1,1.2);
-\draw[<-,black,ultra thick] (0.9,1.4) --(0.1,1.4);
+\draw[->,red,ultra thick] (-0.2,0.1) --(-0.2,0.9);
+\draw[<-,black,ultra thick] (-0.4,0.1) --(-0.4,0.9);
 \node[above left] at (0,1) {$Abraham$};
 
-\draw[->,yellow,ultra thick] (-0.2,0.9) --(-0.2,0.1);
-\draw[<-,black,ultra thick] (-0.4,0.9) --(-0.4,0.1);
-\node[below left] at (0,0) {$Bethany$};
+\draw[->,yellow,ultra thick] (0.1,1.2) --(0.9,1.2);
+\draw[<-,black,ultra thick] (0.1,1.4) --(0.9,1.4);
+\node[below left] at (1,1) {$Bethany$};
 
-\draw[->,orange,ultra thick] (0.1,-0.2) --(0.9,-0.2);
-\draw[<-,black,ultra thick] (0.1,-0.4) --(0.9,-0.4);
+\draw[->,orange,ultra thick] (1.2,0.9) --(1.2,0.1);
+\draw[<-,black,ultra thick] (1.4,0.9) --(1.4,0.1);
 \node[below right] at (1,0) {$Chad$};
 
-\draw[->,green,ultra thick] (1.2,0.1) --(1.2,0.9);
-\draw[<-,black,ultra thick] (1.4,0.1) --(1.4,0.9);
-\node[above right] at (1,1) {$Dorus$};
+\draw[->,green,ultra thick] (0.9,-0.2) --(0.1,-0.2);
+\draw[<-,black,ultra thick] (0.9,-0.4) --(0.1,-0.4);
+\node[above right] at (0,0) {$Dorus$};
 \end{tikzpicture}
 \caption{Using money to decompose the flow of assets, into four one-on-one transactions. Money is the traditional standard solution for clearing trade between strangers, and requires a monetary token to travel in the counter-direction of the trade flow (black arrows). Each participant takes a devaluation risk from the moment they accept the token to the moment they successfully forward it.}
 \end{figure}
@@ -120,14 +125,14 @@ To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitt
 \node[above left] at (9,1) {$A$};
 \node[above left] at (12,1) {$A$};
 
-\node[below left] at (0,0) {$B$};
-\node[below left] at (3,0) {$B$};
-\node[below left] at (6,0) {$B$};
+\node[above right] at (1,1) {$B$};
+\node[above right] at (4,1) {$B$};
+\node[above right] at (7,1) {$B$};
 
 \node[below right] at (1,0) {$C$};
 \node[below right] at (4,0) {$C$};
 
-\node[above right] at (1,1) {$D$};
+\node[below left] at (0,0) {$D$};
 
 \node[below] at (0.5,-0.5) {$1)$};
 \node[below] at (3.5,-0.5) {$2)$};
@@ -141,78 +146,78 @@ To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitt
 \draw [fill=brown] (9.5, 0.5) circle [radius=0.2];
 \draw [fill=brown] (12.5, 0.5) circle [radius=0.2];
 
-\draw[->,cyan,ultra thick] (0.8,0.8) --(0.3,0.8);
+\draw[<-,cyan,ultra thick] (0.8,0.8) --(0.3,0.8);
 \draw [fill=black] (0,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (0.8,0.2) --(0.8,0.8);
+\draw[<-,cyan,ultra thick] (0.8,0.2) --(0.8,0.8);
 \draw [fill=black] (1,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (0.2,0.2) --(0.8,0.2);
+\draw[<-,cyan,ultra thick] (0.2,0.2) --(0.8,0.2);
 \draw [fill=black] (1,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (0.2,0.7) --(0.2,0.2);
+\draw[<-,cyan,ultra thick] (0.2,0.7) --(0.2,0.2);
 \draw [fill=black] (0,0) circle [radius=0.1];
 
 
-\draw[->,cyan,ultra thick] (3.8,0.8) --(3.3,0.8);
-\draw[<-,magenta,ultra thick] (4.2,1.2) --(3.1,1.2);
-\draw[->,red,ultra thick] (3.9,1.0) --(3.1,1.0);
+\draw[<-,cyan,ultra thick] (3.8,0.8) --(3.3,0.8);
+\draw[->,magenta,ultra thick] (4.2,1.2) --(3.1,1.2);
+\draw[<-,red,ultra thick] (3.9,1.0) --(3.1,1.0);
 \draw [fill=black] (3,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (3.8,0.2) --(3.8,0.8);
+\draw[<-,cyan,ultra thick] (3.8,0.2) --(3.8,0.8);
 \draw [fill=black] (4,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (3.2,0.2) --(3.8,0.2);
+\draw[<-,cyan,ultra thick] (3.2,0.2) --(3.8,0.2);
 \draw [fill=black] (4,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (3.2,0.7) --(3.2,0.2);
+\draw[<-,cyan,ultra thick] (3.2,0.7) --(3.2,0.2);
 \draw [fill=black] (3,0) circle [radius=0.1];
 
 
-\draw[->,cyan,ultra thick] (6.8,0.8) --(6.3,0.8);
-\draw[<-,magenta,ultra thick] (7.2,1.2) --(6.1,1.2);
-\draw[->,red,ultra thick] (6.9,1.0) --(6.1,1.0);
+\draw[<-,cyan,ultra thick] (6.8,0.8) --(6.3,0.8);
+\draw[->,magenta,ultra thick] (7.2,1.2) --(6.1,1.2);
+\draw[<-,red,ultra thick] (6.9,1.0) --(6.1,1.0);
 \draw [fill=black] (6,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (6.8,0.2) --(6.8,0.8);
-\draw[<-,magenta,ultra thick] (7.2,-0.2) --(7.2,1.2);
-\draw[->,green,ultra thick] (7,0.1) --(7,0.9);
+\draw[<-,cyan,ultra thick] (6.8,0.2) --(6.8,0.8);
+\draw[->,magenta,ultra thick] (7.2,-0.2) --(7.2,1.2);
+\draw[<-,green,ultra thick] (7,0.1) --(7,0.9);
 \draw [fill=black] (7,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (6.2,0.2) --(6.8,0.2);
+\draw[<-,cyan,ultra thick] (6.2,0.2) --(6.8,0.2);
 \draw [fill=black] (7,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (6.2,0.7) --(6.2,0.2);
+\draw[<-,cyan,ultra thick] (6.2,0.7) --(6.2,0.2);
 \draw [fill=black] (6,0) circle [radius=0.1];
 
 
-\draw[->,cyan,ultra thick] (9.8,0.8) --(9.3,0.8);
-\draw[<-,magenta,ultra thick] (10.2,1.2) --(9.1,1.2);
-\draw[->,red,ultra thick] (9.9,1.0) --(9.1,1.0);
+\draw[<-,cyan,ultra thick] (9.8,0.8) --(9.3,0.8);
+\draw[->,magenta,ultra thick] (10.2,1.2) --(9.1,1.2);
+\draw[<-,red,ultra thick] (9.9,1.0) --(9.1,1.0);
 \draw [fill=black] (9,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (9.8,0.2) --(9.8,0.8);
-\draw[<-,magenta,ultra thick] (10.2,-0.2) --(10.2,1.2);
-\draw[->,green,ultra thick] (10,0.1) --(10,0.9);
+\draw[<-,cyan,ultra thick] (9.8,0.2) --(9.8,0.8);
+\draw[->,magenta,ultra thick] (10.2,-0.2) --(10.2,1.2);
+\draw[<-,green,ultra thick] (10,0.1) --(10,0.9);
 \draw [fill=black] (10,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (9.2,0.2) --(9.8,0.2);
-\draw[<-,magenta,ultra thick] (8.8,-0.2) --(10.2,-0.2);
-\draw[->,orange,ultra thick] (9.1,0) --(9.9,0);
+\draw[<-,cyan,ultra thick] (9.2,0.2) --(9.8,0.2);
+\draw[->,magenta,ultra thick] (8.8,-0.2) --(10.2,-0.2);
+\draw[<-,orange,ultra thick] (9.1,0) --(9.9,0);
 \draw [fill=black] (10,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (9.2,0.7) --(9.2,0.2);
+\draw[<-,cyan,ultra thick] (9.2,0.7) --(9.2,0.2);
 \draw [fill=black] (9,0) circle [radius=0.1];
 
 
-\draw[->,cyan,ultra thick] (12.8,0.8) --(12.3,0.8);
-\draw[<-,magenta,ultra thick] (13.2,1.2) --(12.1,1.2);
-\draw[->,red,ultra thick] (12.9,1.0) --(12.1,1.0);
+\draw[<-,cyan,ultra thick] (12.8,0.8) --(12.3,0.8);
+\draw[->,magenta,ultra thick] (13.2,1.2) --(12.1,1.2);
+\draw[<-,red,ultra thick] (12.9,1.0) --(12.1,1.0);
 \draw [fill=black] (12,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (12.8,0.2) --(12.8,0.8);
-\draw[<-,magenta,ultra thick] (13.2,-0.2) --(13.2,1.2);
-\draw[->,green,ultra thick] (13,0.1) --(13,0.9);
+\draw[<-,cyan,ultra thick] (12.8,0.2) --(12.8,0.8);
+\draw[->,magenta,ultra thick] (13.2,-0.2) --(13.2,1.2);
+\draw[<-,green,ultra thick] (13,0.1) --(13,0.9);
 \draw [fill=black] (13,1) circle [radius=0.1];
 
 \draw[->,cyan,ultra thick] (12.2,0.2) --(12.8,0.2);
@@ -220,9 +225,9 @@ To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitt
 \draw[->,orange,ultra thick] (12.1,0) --(12.9,0);
 \draw [fill=black] (13,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (12.2,0.7) --(12.2,0.2);
-\draw[<-,magenta,ultra thick] (11.8,0.9) --(11.8,-0.2);
-\draw[->,yellow,ultra thick] (12,0.9) --(12,0.1);
+\draw[<-,cyan,ultra thick] (12.2,0.7) --(12.2,0.2);
+\draw[->,magenta,ultra thick] (11.8,0.9) --(11.8,-0.2);
+\draw[<-,yellow,ultra thick] (12,0.9) --(12,0.1);
 \draw [fill=black] (12,0) circle [radius=0.1];
 \end{tikzpicture}
 \caption{Step 1) Each participant uses the same LedgerLoops challenge to send a \textbf{\color{cyan} cryptographically triggered IOU}. Step 2) Only Abraham can solve the challenge, and uses the solution as a \textbf{\color{magenta} LedgerLoops trigger} to claim the {\color{red} Apple}. Step 3) Dorus reuses the trigger to claim the {\color{green} Durian}. Step 4) Chad can now claim the {\color{orange} Carrot}. Step 5) Bethany claims the {\color{yellow} Banana} from Abraham. This safely coordinates all four transactions in one atomic trigger.}
