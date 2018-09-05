@@ -282,33 +282,31 @@ Before finding a loop along which assets can move around, the first step of the 
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.7",
-  "msgType": "initiate-ledger-append",
-  "previousHash": "<the ledger head's hash, or null first time>",
-  "hash": "<see below for calculation>",
+  "protocol": "ledgerloops-0.8",
+  "msgType": "ADD",
+  "msgId": <integer>,
   "note": "<a description of why this entry is added>,
-  "debtor": "<identifies debtor; just a nickname>",
-  "addedDebts": {
-    "unit1": amount1, // for instance "USD": 10,
-    "unit2": amount2, // for instance "EUR": -8,
-    ...,
-  },
+  "beneficiary": "<identifies party gaining balance; just a nickname>",
+  "sender": "<usually the other party in the two-peer ledger; just nickname>",
+  "amount": <integer>,
+  "unit": "UCR"
 }
 \end{lstlisting}}
 
-The hash is the SHA-256 hash of the alphabetically sorted UTF-8 JSON representation of the object containing just the previousHash, note, debtor, and addedDebts fields (not the protocol, msgType and hash fields).
+The Unicurn ("UNIversal CUrrency RefereNce" / "UCR") is defined relative to a trade-weighted basket of reference currencies, see https://unicurn.com (I'm still working on defining this).
 
 Even if the communication network is reliable and would detect network outages without losing any messages, a malfunction in the receiver's software could make it look like this message was received successfully when in fact it was not, so to confirm receipt, the recipient replies with:
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.7",
-  "msgType": "confirm-ledger-append",
-  "hash": "<same as in initiate-ledger-append message>",
+  "protocol": "ledgerloops-0.8",
+  "msgType": "ACK",
+  "sender": "<same as in ADD message>",
+  "msgId": "<same as in ADD message>"
 }
 \end{lstlisting}}
 
-As soon as the 'confirm-ledger-append' message has been sent, both peers update their copy of the ledger by appending this one entry.
+As soon as the 'ACK' message has been sent, both peers update their copy of the ledger by appending this one entry.
 So in the current implementation, LedgerLoops coordination is used to create or cancel debts, not directly to trigger the movement of assets. Each participant will be happy if they can exchange one of their incoming debts against one of their outgoing debt, since the balance of each debt will go down, thereby minimizing their exposure to credit risk and enabling new trades to take place. Also, peers can offer goods first, and only if a loop is found, commit to actually owing the delivery of these goods.
 
 \subsection{Routing}
@@ -325,148 +323,89 @@ Finding cycles in a graph of which no one has a bird's eye view is an interestin
 
 This algorithm is more decentralized than Rocha-Thatte. Another simple algorithm would be to forward tokens from node to node, along a depth-first search ('DFS'), until a back-edge is found.
 
-I adapted the DCD algorithm algorithm slightly and sort of combined it with DFS to make it work in graphs whose topology can change while the algorithm is running. I called this algorithm 'DDCD-DFS', an implementation in node.js is underway. It works roughly as follows (this is not a complete description yet, as I'm still working out how to deal with each edge case):
+I previously worked on a combination of DCD with DFS, but I now think that DCD's "I am not part of a loop" messages are hard to use in a changing graph where cycles are created and removed often. Instead, I'm now working on a version that uses just DFS whenever an edge is added to the network.
 
-At first, if a node has no neighbors in the debt graph, it is created in deactivated mode.
+\subsection{Hashlocked IOUs}
 
-\begin{itemize}
-\item When a link is added, a routeId is assigned to it.
-\item The node after the link sends a probe message to one of its out-neighbors.
-\item The node that receives this message forwards it to one of its own out-neighbors.
-\item If the probe reaches a node with no out-neighbors, that node sends back a "No" message.
-\item If a "No" message is received, a new probe is started and sent to one of the siblings of the out-neighbor that sent the "No" message. Also, a "Pending" message is sent back to the in-neighbor from which the original probe came.
-\item If a "Pending" message is received, it is propagated back to the in-neighbor from which the original probe came.
-\item If the node that started the probe receives a "Pending" message, it marks that out-neighbor as pending, and notes down the timestamp.
-\item If a known routeId is received from an in-neighbor, that's a cycle.
-\end{itemize}
-
-A node can send "No" messages in error or while lying on purpose - when this happens, this messages more precisely means "I'm not on a cycle of nodes that cooperate correctly". A "Pending" message sent in error or maliciously is not semantically incorrect in its meaning, because it just means a cycle "might" exist. It could distract nodes from real cycles, but it would be up to the first non-malicious and non-malfunctioning node to distrust, deprioritize, or unfriend a neighbor who sends a lot of distracting messages. This is an area for further research.
-
-The message formats exchanged are as follows. For sending the probes:
-\vbox{\begin{lstlisting}
-{
-  "protocol": "ddcd-dfs-0.3",
-  "msgType": "probe",
-  "routeId": "<a long unique string>",
-}
-\end{lstlisting}}
-
-For replying "No":
+The initiator generates a random string and calculates its SHA-256 hash value. It then sends the following message to an out-neighbor:
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ddcd-dfs-0.3",
-  "msgType": "not-routable",
-  "routeId": "<string from the probe message>",
+  "protocol": "ledgerloops-0.8",
+  "msgType": "COND",
+  "msgId": <integer>,
+  "condition": <256 bits in a lower-case hex string>,
+  "note": "<a description of why this entry is added>,
+  "beneficiary": "<identifies party gaining balance; just a nickname>",
+  "sender": "<usually the other party in the two-peer ledger; just nickname>",
+  "amount": <integer>,
+  "unit": "UCR"
 }
 \end{lstlisting}}
-
-For replying "Pending":
-
-\vbox{\begin{lstlisting}
-{
-  "protocol": "ddcd-dfs-0.3",
-  "msgType": "still-pending",
-  "routeId": "<string from the probe message>",
-}
-\end{lstlisting}}
-
-The "Pending" messages may need to be repeated periodically, to deal with nodes that are not always connected.
-
-\subsection{Cryptographically triggered IOUs}
-
-The initiator generates a random string and calculates its SHA-256 hash value. It then sends the following message to the out-neighbor to which it sent the routeId that looped around:
-
-\vbox{\begin{lstlisting}
-{
-  "protocol": "ledgerloops-0.7",
-  "msgType": "debt-definition",
-  "id": "<long string, referred to in subsequent messages>",
-  "unit": "currency, service or asset",
-  "amount": "<number of units offered>",
-}
-\end{lstlisting}}
-
-\vbox{\begin{lstlisting}
-{
-  "protocol": "ledgerloops-0.7",
-  "msgType": "conditional-promise",
-  "id": "<long string, referred to in subsequent messages>",
-  "debtId": "<id from debt-definition>",
-  "valueEstimate": {
-    "unit": "UCR",
-    "amount": "<number of unicurns estimated value of the offer>",
-  },
-  "challenge": {
-    "type": "hash-challenge",
-    "function": "sha-256",
-    "hash": "<hash value in hex format>",
-  },
-  "routeId": "<from routing phase>",
-}
-\end{lstlisting}}
-
-The Unicurn ("UNIversal CUrrency RefereNce" / "UCR") is defined relative to a trade-weighted basket of reference currencies, see https://unicurn.com (I'm still working on defining this).
 
 Note that a sender can offer parts of a specific asset, even if the asset is a physical item that cannot be split into parts.
 For instance, I could send you 10 IOUs, each referring to the blue bicycle I showed you as the "unit", and each for an amount of 0.1.
-It is important to use each debt-definition only once, so that it is clear which IOU is being triggered, and this is also tracked
+It is important to use each hashlock only once, so that it is clear which IOU is being triggered, and this is also tracked
 correctly in our peer-to-peer ledger afterwards. As soon as I owe you 10 times one tenth of the blue bicycle, you can claim the
 entire bicycle. You could also claim the bicycle after I owe you only 8 tenths of it, after which you would owe me the equivalent
 of 2 tenths of the blue bicycle. This requires a more long-term form of trust between us than one-off trades of entire assets or
 fungeable assets. Another option would be to value the blue bicycle in terms of a more common unit of value (for instance a standard
 government-issued currency, a crypto-currency, a rare metal, or kiloWatt-hours of energy). This could simplify our peer-to-peer ledger.
-For the conditional-promise I send you, it only matters that we agree on what the unit of value refers to, and unlike currencies which are
+For the conditional promise I send you, it only matters that we agree on what the unit of value refers to, and unlike currencies which are
 used as money, this unit of value does not need to have any meaning to anyone apart from the two peers who discuss it.
 
-Each participant reuses the 'challenge' part of the con\-di\-tio\-nal-pro\-mise they receive, and creates a new conditional promise, mentioning
-a different debtId, depending on the asset they want to offer their peer in this cryptographically triggered IOU. The valueEstimate should be
-the same though, because the initiator will not be willing to trigger the loop if the valueEstimate was decreased along the way.
+Each participant reuses the 'condition' part of the con\-di\-tio\-nal pro\-mise they receive, and creates their own outgoing hashlocked IOU. The amount and unit should be roughly the same, so that when the forwarded COND message loops around to the initiator, the value is still roughly the same and the initiator will decide to publish the hashlock's solution. See the section about "Multi-lateral netting at equilibrium" below for a more precise discussion of exchange rate setting.
 
-For now, the Unicurn is the only unit of value allowed for value estimates in conditional-promise messages.
+For now, the Unicurn is the only unit of value allowed for value estimates in COND messages.
 
-Once a conditional-promise message reaches the initiator, describing the unit of value the initiator desires, and promising an amount which the initiator finds acceptable compared to the amount of asset he offered when starting the loop, trade becomes possible. The initiator confirms that the incoming conditional-promise message uses the same challenge
-details which he created, he solves the challenge, and the solution to the challenge is sent round in the opposite direction:
+Once a conditional promise message reaches the initiator, describing the unit of value the initiator desires, and promising an amount which the initiator finds acceptable compared to the amount of asset he offered when starting the loop, trade becomes possible. The initiator confirms that the incoming conditional promise message uses the same challenge
+details which he created, and the solution to the challenge is sent round in the opposite direction:
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.7",
-  "msgType": "satisfy-condition",
-  "conditionalPromiseId": "<id from conditional-promise>",
-  "solution": "<original random string in base64 format>",
+  "protocol": "ledgerloops-0.8",
+  "msgType": "FULFILL",
+  "sender": "<sender of COND message>",
+  "msgId": "<same id as COND message>",
+  "preimage": "<original random string in lowercase hex format>",
 }
 \end{lstlisting}}
 
+The receiver of a FULFILL message converts the solution field from its hex string representation, calculates the SHA-256 hash value of the resulting raw bytes, and converts the hash value back to lowercase hex representation. If the result matches the hash value from the challenge, the solution has been verified to be correct. The receiver replies with the "ACK"
+message format from earlier (using the msgId from the "FULFILL" message) to confirm to the sender that the solution has been accepted, and the receiver agrees with the resulting update of their peer-to-peer ledger. The receiver has now lost the asset from their own earlier conditional promise, but has gained knowledge of the solution to the challenge used in all conditional promise messages sent earlier. He uses the solution to create his own FULFILL message and claim the asset that was conditionally promised to him by his other neighbor in the loop. Once all nodes along the loop have done this, the trade is complete.
 
-The receiver of a satisfy-condition message converts the solution field from its base64 representation, calculates the SHA-256 hash value of the resulting raw bytes, and converts the hash value back to base64 representation. If the result matches the hash value from the challenge, the solution has been verified to be correct. The receiver replies with the "confirm-update"
-message format from earlier (using the transactionId from the "satisfy-condition" message) to confirm to the sender that the solution has been accepted, and the receiver agrees with the resulting update of their peer-to-peer ledger. The receiver has now lost the asset from their own earlier conditional-promise message, but has gained knowledge of the solution to the challenge used in all conditional-promise messages sent earlier. He uses the solution to create his own satisfy-condition message and claim the asset that was conditionally promised to him by his other neighbor in the loop. Once all nodes along the loop have done this, the trade is complete.
+Just like an ADD message, FULFILL message should be responded to with an ACK message in order to commit the proposed new entry to the peer-to-peer ledger on both sides.
 
-If a node decides it has been waiting for too long, it can request a revokation of the cryptographically triggered IOU they sent earlier,
+If a node decides it has been waiting for too long, it can request a revokation of the hashlocked IOU they sent earlier,
 by sending this messages behind it:
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.7",
-  "msgType": "please-reject",
-  "conditionalPromiseId": "<id from conditional-promise>",
+  "protocol": "ledgerloops-0.8",
+  "msgType": "PLEASE-FINALIZE",
+  "sender": "<sender of the COND message and also of this message>",
+  "msgId": "<same id as the COND message>"
 }
 \end{lstlisting}}
 
 A node should probably wait a few milliseconds before forwarding a cryptographically triggered IOU, in case the IOU has been buffered in
-a slow place for a while, and now has a "please-reject" message following directly behind it.
+a slow place for a while, and now has a "PLEASE-FINALIZE" message following directly behind it.
 
-To reject the cryptographically-triggered IOU you received earlier, use this message:
+To reject a hashlocked IOU you received earlier, use this message:
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.7",
-  "msgType": "reject",
-  "conditionalPromiseId": "<id from conditional-promise>",
+  "protocol": "ledgerloops-0.8",
+  "msgType": "REJECT",
+  "sender": "<sender of the COND message>",
+  "msgId": "<same id as the COND message>"
+  "reason": "human-readable free text",
 }
 \end{lstlisting}}
 
+The rejection will only be valid if it is sent by the recipient of the COND message in question.
 
-The rejection will only be valid if it is sent by the recipient of the conditional-promise message in question.
+A REJECT message can also be used to reject an ADD or FULFILL message. So the message flows are: (1) ADD-ACK, (2) ADD-REJECT, (3) COND-[PLEASE-FINALIZE]*-FULFILL-ACK, (4) COND-[PLEASE-FINALIZE]*-FULFILL-REJECT, (4) COND-[PLEASE-FINALIZE]*-REJECT. Messages can be repeated to guarantee eventual agreement over a ledger entry (a ledger entry is uniquely defined by its sender and msgId).
 
 \section{Security Discussion}
 \subsection{Assessment Scope}
@@ -600,9 +539,9 @@ Without the use of LedgerLoops, trade can only be facilited, and value can only 
 Such trust in a (by itself worthless) token is often based on hype (hoping a certain crypto-currency will stay popular), or on war (politicians will generally send their soldiers to war to defend a government-issued currency when the power of the government is at risk), or on citizen-paid taxes (often used to bail out failing banks). LedgerLoops avoids this reliance on globally defined tokens, which makes it a much more decentralized technology. Any group of people can start to use the LedgerLoops protocol within their community, without relying on the health of a globally defined currency or on the health of a global network. If a hype of activity in LedgerLoops transaction rises and falls in some local geographic area, this has very little effect on the ability of people in another geographic area to use the LedgerLoops protocol. That being said, of course, communities would benefit from connecting with another community, and this would automatically happen if a few users form part of both communities. This network effect is very similar to how the internet works ("Connectivity is its own Reward").
 
 \subsection{Starting to use LedgerLoops}
-First of all, let me state that version 0.7 of LedgerLoops should be considered a developer preview, and further development will most likely be needed before the protocol is production-ready. Until we gain a better understanding of the network dynamics in more complex topologies, its use is only recommended for academic experiments, not for real-world trade. Users are advised to only trade very small assets, for instance up to 1 USD, since we can't yet predict what dynamics would arise, and what other security considerations may be discovered during such initial experiments.
+First of all, let me state that version 0.8 of LedgerLoops should be considered a developer preview, and further development will most likely be needed before the protocol is production-ready. Until we gain a better understanding of the network dynamics in more complex topologies, its use is only recommended for academic experiments, not for real-world trade. Users are advised to only trade very small assets, for instance up to 1 USD, since we can't yet predict what dynamics would arise, and what other security considerations may be discovered during such initial experiments.
 
-Also, the current version of the software used on the demo page is not recommended for production; I probably need to rewrite it from scratch, using what I learned in the last few weeks developing this version 0.7 of LedgerLoops. Importantly, the code has also not been reviewed by a security expert yet, so it's not unlikely that this implementation contains a few vulnerabilities; in short, please only use it to run simulations, don't entrust it with data about your real-world trade peers yet.
+Also, the current version of the software used on the demo page is not recommended for production; I probably need to rewrite it from scratch, using what I learned in the last few weeks developing this version 0.8 of LedgerLoops. Importantly, the code has also not been reviewed by a security expert yet, so it's not unlikely that this implementation contains a few vulnerabilities; in short, please only use it to run simulations, don't entrust it with data about your real-world trade peers yet.
 
 One path to start using LedgerLoops in the real world, would be to develop an Android app which can access a smartphone's addressbook, and use the API of an existing end-to-end encrypted messaging platform for delivering the LedgerLoops messages to the user's neighbors. This would require a potential user to convince their real-world trade peers to install the same app, which would be impractical for casual one-time trade peers, but could work well for, for instance, people who share a house, or for the members of a sports club (where the administration of membership fees could be a driving use case).
 
