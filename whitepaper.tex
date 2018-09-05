@@ -41,20 +41,20 @@
 \lstset{language=json}
 
 \begin{document}
-\title{{\em Ledger Loops}: Using cryptographic triggers to make the world go round.}
+\title{{\em Ledger Loops}: Hashlocked IOUs make the world go round.}
 \author{Michiel B. de Jong}
-\date{November 2016}
+\date{September 2018}
 \maketitle
 \begin{abstract}
-LedgerLoops is a novel financial technology. Ra\-ther than a cryp\-to-cur\-ren\-cy or new form of mo\-ney, it is better viewed as an alternative to money. At its core is the concept of {\em cryptographic triggers}.
+LedgerLoops is a novel financial technology. Ra\-ther than a cryp\-to-cur\-ren\-cy or new form of mo\-ney, it is better viewed as an alternative to money. At its core is the concept of {\em hashlocks}.
 
 In this whitepaper, the Whispering Merchants problem serves as a simplified abstraction of economic exchange in general, where assets flow in loops. Traditionally, money would flow in the opposite direction, thus solving the coordination problem by effectively reducing the loop to a chain of one-to-one transactions. But money has a number of downsides, mainly due to the need to trust people other than your direct economical neighbors. Value fluctuations in a currency act as a single point of failure, which can have devastating effects on economic trade. LedgerLoops aims to allow assets to move around, while every trader only needs to trusts their own direct peers.
 
-LedgerLoops is a novel solution to the Whispering Merchants problem, based on a cryptographic trigger which activates each local IOU, ra\-ther than mo\-ving some sort of currency around the circle of merchants in the opposite direction.
+LedgerLoops is a novel solution to the Whispering Merchants problem, based on a cryptographic trigger (hashlock) which activates each local IOU, ra\-ther than mo\-ving some sort of currency around the circle of merchants in the opposite direction.
 \end{abstract}
 
 \section{The Whispering Merchants Problem}
-In the Whispering Merchants problem, merchants sit in a circle, facing outward. Each merchant can only communicate with their two direct neighbors in the circle. Each merchant wants to offer an asset to their left neighbor, and obtain an asset from their right neighbor. Each merchant trusts their immediate neighbors to keep any promises they make, but they do not trust anyone else (thus excluding fiat money as an option), nor are they interested in any other asset than the item offered by their right neighbor (thus excluding commodity money). The problem exists in achieving cooperation between the merchants so that all assets move one merchant to the left.
+In the Whispering Merchants problem, merchants sit in a circle, facing outward. Each merchant can only communicate with their two direct neighbors in the circle. Each merchant wants to offer an asset to their clockwise neighbor, and obtain an asset from anti-clockwise neighbor. Each merchant trusts their immediate neighbors to keep any promises they make, but they do not trust anyone else (thus excluding fiat money as an option), nor are they interested in any other asset than the item offered by their anti-clockwise neighbor (thus excluding commodity money). The problem exists in achieving cooperation between the merchants so that all assets move clockwise by one merchant.
 
 To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitting in a circle, facing outward.
 
@@ -62,27 +62,32 @@ To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitt
 \begin{tikzpicture}
 \draw [fill=brown] (0.5, 0.5) circle [radius=0.2];
 
-\draw[->,red,ultra thick] (0.9,1) --(0.1,1);
+\draw[->,red,ultra thick] (0,0.1) --(0,0.9);
 \draw [fill=black] (0,1) circle [radius=0.1];
 \node[above left] at (0,1) {$Abraham$};
 
-\draw[->,yellow,ultra thick] (0,0.9) --(0,0.1);
-\draw [fill=black] (0, 0) circle [radius=0.1];
-\node[below left] at (0,0) {$Bethany$};
+\draw[->,yellow,ultra thick] (0.1,1) --(0.9,1);
+\draw [fill=black] (1, 1) circle [radius=0.1];
+\node[above right] at (1,1) {$Bethany$};
 
-\draw[->,orange,ultra thick] (0.1,0) --(0.9,0);
+\draw[->,orange,ultra thick] (1,0.9) --(1,0.1);
 \draw [fill=black] (1,0) circle [radius=0.1];
 \node[below right] at (1,0) {$Chad$};
 
-\draw[->,green,ultra thick] (1,0.1) --(1,0.9);
-\draw [fill=black] (1, 1) circle [radius=0.1];
-\node[above right] at (1,1) {$Dorus$};
+\draw[->,green,ultra thick] (0.9,0) --(0.1,0);
+\draw [fill=black] (0, 0) circle [radius=0.1];
+\node[below left] at (0,0) {$Dorus$};
 \end{tikzpicture}
 \caption{Abraham has a \textbf{\color{yellow} Banana} to offer Bethany. Bethany has a \textbf{\color{orange} Carrot} for Chad. Chad has a \textbf{\color{green} Durian} for Dorus. Dorus, in turn, has an \textbf{\color{red} Apple} to offer, in which Abraham is interested.}
 \end{figure}
 
 \begin{figure}
 \begin{tikzpicture}
+Abraham: 0,1
+Bethany: 0,0 -> 1,1
+Chad: 1,0
+Dorus: 1,1 -> 0,0
+
 \draw [black] (1.3, 0.5) circle [radius=0.5];
 \draw [black] (0.5, 1.3) circle [radius=0.5];
 \draw [black] (0.5, -0.3) circle [radius=0.5];
@@ -93,167 +98,182 @@ To give an example, consider 4 merchants, Abraham, Bethany, Chad and Dorus, sitt
 
 \draw [fill=brown] (0.5, 0.5) circle [radius=0.2];
 
-\draw[->,red,ultra thick] (0.9,1.2) --(0.1,1.2);
-\draw[<-,black,ultra thick] (0.9,1.4) --(0.1,1.4);
+\draw[->,red,ultra thick] (-0.2,0.1) --(-0.2,0.9);
+\draw[<-,black,ultra thick] (-0.4,0.1) --(-0.4,0.9);
 \node[above left] at (0,1) {$Abraham$};
 
-\draw[->,yellow,ultra thick] (-0.2,0.9) --(-0.2,0.1);
-\draw[<-,black,ultra thick] (-0.4,0.9) --(-0.4,0.1);
-\node[below left] at (0,0) {$Bethany$};
+\draw[->,yellow,ultra thick] (0.1,1.2) --(0.9,1.2);
+\draw[<-,black,ultra thick] (0.1,1.4) --(0.9,1.4);
+\node[above right] at (1,1) {$Bethany$};
 
-\draw[->,orange,ultra thick] (0.1,-0.2) --(0.9,-0.2);
-\draw[<-,black,ultra thick] (0.1,-0.4) --(0.9,-0.4);
+\draw[->,orange,ultra thick] (1.2,0.9) --(1.2,0.1);
+\draw[<-,black,ultra thick] (1.4,0.9) --(1.4,0.1);
 \node[below right] at (1,0) {$Chad$};
 
-\draw[->,green,ultra thick] (1.2,0.1) --(1.2,0.9);
-\draw[<-,black,ultra thick] (1.4,0.1) --(1.4,0.9);
-\node[above right] at (1,1) {$Dorus$};
+\draw[->,green,ultra thick] (0.9,-0.2) --(0.1,-0.2);
+\draw[<-,black,ultra thick] (0.9,-0.4) --(0.1,-0.4);
+\node[below left] at (0,0) {$Dorus$};
 \end{tikzpicture}
 \caption{Using money to decompose the flow of assets, into four one-on-one transactions. Money is the traditional standard solution for clearing trade between strangers, and requires a monetary token to travel in the counter-direction of the trade flow (black arrows). Each participant takes a devaluation risk from the moment they accept the token to the moment they successfully forward it.}
 \end{figure}
 
 \begin{figure}
 \begin{tikzpicture}[scale=0.9]
+% letters
 \node[above left] at (0,1) {$A$};
 \node[above left] at (3,1) {$A$};
 \node[above left] at (6,1) {$A$};
 \node[above left] at (9,1) {$A$};
 \node[above left] at (12,1) {$A$};
 
-\node[below left] at (0,0) {$B$};
-\node[below left] at (3,0) {$B$};
-\node[below left] at (6,0) {$B$};
+\node[above right] at (1,1) {$B$};
+\node[above right] at (4,1) {$B$};
+\node[above right] at (7,1) {$B$};
+\node[above right] at (10,1) {$B$};
 
 \node[below right] at (1,0) {$C$};
 \node[below right] at (4,0) {$C$};
+\node[below right] at (7,0) {$C$};
 
-\node[above right] at (1,1) {$D$};
+\node[below left] at (0,0) {$D$};
+\node[below left] at (3,0) {$D$};
 
+% numbers
 \node[below] at (0.5,-0.5) {$1)$};
 \node[below] at (3.5,-0.5) {$2)$};
 \node[below] at (6.5,-0.5) {$3)$};
 \node[below] at (9.5,-0.5) {$4)$};
 \node[below] at (12.5,-0.5) {$5)$};
 
+% trees
 \draw [fill=brown] (0.5, 0.5) circle [radius=0.2];
 \draw [fill=brown] (3.5, 0.5) circle [radius=0.2];
 \draw [fill=brown] (6.5, 0.5) circle [radius=0.2];
 \draw [fill=brown] (9.5, 0.5) circle [radius=0.2];
 \draw [fill=brown] (12.5, 0.5) circle [radius=0.2];
 
-\draw[->,cyan,ultra thick] (0.8,0.8) --(0.3,0.8);
+% step 1 cyan and black
+\draw[<-,cyan,ultra thick] (0.8,0.8) --(0.3,0.8);
 \draw [fill=black] (0,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (0.8,0.2) --(0.8,0.8);
+\draw[<-,cyan,ultra thick] (0.8,0.2) --(0.8,0.8);
 \draw [fill=black] (1,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (0.2,0.2) --(0.8,0.2);
+\draw[<-,cyan,ultra thick] (0.2,0.2) --(0.8,0.2);
 \draw [fill=black] (1,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (0.2,0.7) --(0.2,0.2);
+\draw[<-,cyan,ultra thick] (0.2,0.7) --(0.2,0.2);
 \draw [fill=black] (0,0) circle [radius=0.1];
 
-
-\draw[->,cyan,ultra thick] (3.8,0.8) --(3.3,0.8);
-\draw[<-,magenta,ultra thick] (4.2,1.2) --(3.1,1.2);
-\draw[->,red,ultra thick] (3.9,1.0) --(3.1,1.0);
+% step 2 cyan and black
+\draw[<-,cyan,ultra thick] (3.8,0.8) --(3.3,0.8);
 \draw [fill=black] (3,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (3.8,0.2) --(3.8,0.8);
+\draw[<-,cyan,ultra thick] (3.8,0.2) --(3.8,0.8);
 \draw [fill=black] (4,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (3.2,0.2) --(3.8,0.2);
+\draw[<-,cyan,ultra thick] (3.2,0.2) --(3.8,0.2);
 \draw [fill=black] (4,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (3.2,0.7) --(3.2,0.2);
+\draw[<-,cyan,ultra thick] (3.2,0.7) --(3.2,0.2);
 \draw [fill=black] (3,0) circle [radius=0.1];
 
-
-\draw[->,cyan,ultra thick] (6.8,0.8) --(6.3,0.8);
-\draw[<-,magenta,ultra thick] (7.2,1.2) --(6.1,1.2);
-\draw[->,red,ultra thick] (6.9,1.0) --(6.1,1.0);
+% step 3 cyan and black
+\draw[<-,cyan,ultra thick] (6.8,0.8) --(6.3,0.8);
 \draw [fill=black] (6,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (6.8,0.2) --(6.8,0.8);
-\draw[<-,magenta,ultra thick] (7.2,-0.2) --(7.2,1.2);
-\draw[->,green,ultra thick] (7,0.1) --(7,0.9);
+\draw[<-,cyan,ultra thick] (6.8,0.2) --(6.8,0.8);
 \draw [fill=black] (7,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (6.2,0.2) --(6.8,0.2);
+\draw[<-,cyan,ultra thick] (6.2,0.2) --(6.8,0.2);
 \draw [fill=black] (7,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (6.2,0.7) --(6.2,0.2);
+\draw[<-,cyan,ultra thick] (6.2,0.7) --(6.2,0.2);
 \draw [fill=black] (6,0) circle [radius=0.1];
 
-
-\draw[->,cyan,ultra thick] (9.8,0.8) --(9.3,0.8);
-\draw[<-,magenta,ultra thick] (10.2,1.2) --(9.1,1.2);
-\draw[->,red,ultra thick] (9.9,1.0) --(9.1,1.0);
+% step 4 cyan and black
+\draw[<-,cyan,ultra thick] (9.8,0.8) --(9.3,0.8);
 \draw [fill=black] (9,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (9.8,0.2) --(9.8,0.8);
-\draw[<-,magenta,ultra thick] (10.2,-0.2) --(10.2,1.2);
-\draw[->,green,ultra thick] (10,0.1) --(10,0.9);
+\draw[<-,cyan,ultra thick] (9.8,0.2) --(9.8,0.8);
 \draw [fill=black] (10,1) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (9.2,0.2) --(9.8,0.2);
-\draw[<-,magenta,ultra thick] (8.8,-0.2) --(10.2,-0.2);
-\draw[->,orange,ultra thick] (9.1,0) --(9.9,0);
+\draw[<-,cyan,ultra thick] (9.2,0.2) --(9.8,0.2);
 \draw [fill=black] (10,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (9.2,0.7) --(9.2,0.2);
+\draw[<-,cyan,ultra thick] (9.2,0.7) --(9.2,0.2);
 \draw [fill=black] (9,0) circle [radius=0.1];
 
-
-\draw[->,cyan,ultra thick] (12.8,0.8) --(12.3,0.8);
-\draw[<-,magenta,ultra thick] (13.2,1.2) --(12.1,1.2);
-\draw[->,red,ultra thick] (12.9,1.0) --(12.1,1.0);
-\draw [fill=black] (12,1) circle [radius=0.1];
-
-\draw[->,cyan,ultra thick] (12.8,0.2) --(12.8,0.8);
-\draw[<-,magenta,ultra thick] (13.2,-0.2) --(13.2,1.2);
-\draw[->,green,ultra thick] (13,0.1) --(13,0.9);
-\draw [fill=black] (13,1) circle [radius=0.1];
+% step 5 cyan and black
+\draw[<-,cyan,ultra thick] (12.2,0.7) --(12.2,0.2);
+\draw [fill=black] (12,0) circle [radius=0.1];
 
 \draw[->,cyan,ultra thick] (12.2,0.2) --(12.8,0.2);
-\draw[<-,magenta,ultra thick] (11.8,-0.2) --(13.2,-0.2);
-\draw[->,orange,ultra thick] (12.1,0) --(12.9,0);
 \draw [fill=black] (13,0) circle [radius=0.1];
 
-\draw[->,cyan,ultra thick] (12.2,0.7) --(12.2,0.2);
-\draw[<-,magenta,ultra thick] (11.8,0.9) --(11.8,-0.2);
-\draw[->,yellow,ultra thick] (12,0.9) --(12,0.1);
-\draw [fill=black] (12,0) circle [radius=0.1];
+\draw[<-,cyan,ultra thick] (12.8,0.2) --(12.8,0.8);
+\draw [fill=black] (13,1) circle [radius=0.1];
+
+\draw[<-,cyan,ultra thick] (12.8,0.8) --(12.3,0.8);
+\draw [fill=black] (12,1) circle [radius=0.1];
+
+% red and its magenta:
+\draw[->,magenta,ultra thick] (2.8,0.9) --(2.8,0); % 0 instead of -0.2 to avoid hitting the D
+\draw[<-,red,ultra thick] (3,0.9) --(3,0.1);
+\draw[->,magenta,ultra thick] (5.8,0.9) --(5.8,-0.2);
+\draw[<-,red,ultra thick] (6,0.9) --(6,0.1);
+\draw[->,magenta,ultra thick] (8.8,0.9) --(8.8,-0.2);
+\draw[<-,red,ultra thick] (9,0.9) --(9,0.1);
+\draw[->,magenta,ultra thick] (11.8,0.9) --(11.8,-0.2);
+\draw[<-,red,ultra thick] (12,0.9) --(12,0.1);
+
+% green and its magenta:
+\draw[->,magenta,ultra thick] (5.8,-0.2) --(7.0,-0.2); % 7.0 instead of 7.2 to avoid hitting the C
+\draw[<-,green,ultra thick] (6.1,0) --(6.9,0);
+\draw[->,magenta,ultra thick] (8.8,-0.2) --(10.2,-0.2);
+\draw[<-,green,ultra thick] (9.1,0) --(9.9,0);
+\draw[->,magenta,ultra thick] (11.8,-0.2) --(13.2,-0.2);
+\draw[<-,green,ultra thick] (12.1,0) --(12.9,0);
+
+% orange and its magenta:
+\draw[->,magenta,ultra thick] (10.2,-0.2) --(10.2,1.0); % 1.0 instead of 1.2 to avoid hitting the B
+\draw[<-,orange,ultra thick] (10,0.1) --(10,0.9);
+\draw[->,magenta,ultra thick] (13.2,-0.2) --(13.2,1.2);
+\draw[<-,orange,ultra thick] (13,0.1) --(13,0.9);
+
+% yellow and its magenta:
+\draw[->,magenta,ultra thick] (13.2,1.2) --(12.0,1.2); % 12.0 instead of 11.8 to avoid hitting the A
+\draw[<-,yellow,ultra thick] (12.9,1.0) --(12.1,1.0);
+% 01 2 34 5 67 8 90 1 23
+
 \end{tikzpicture}
-\caption{Step 1) Each participant uses the same LedgerLoops challenge to send a \textbf{\color{cyan} cryptographically triggered IOU}. Step 2) Only Abraham can solve the challenge, and uses the solution as a \textbf{\color{magenta} LedgerLoops trigger} to claim the {\color{red} Apple}. Step 3) Dorus reuses the trigger to claim the {\color{green} Durian}. Step 4) Chad can now claim the {\color{orange} Carrot}. Step 5) Bethany claims the {\color{yellow} Banana} from Abraham. This safely coordinates all four transactions in one atomic trigger.}
+\caption{Step 1) Each participant uses the same hashlock to send a \textbf{\color{cyan} cryptographically triggered IOU}. Step 2) Only Abraham can solve the hashlock, and uses the solution as a \textbf{\color{magenta} LedgerLoops trigger} to claim the {\color{red} Apple}. Step 3) Dorus reuses the trigger to claim the {\color{green} Durian}. Step 4) Chad can now claim the {\color{orange} Carrot}. Step 5) Bethany claims the {\color{yellow} Banana} from Abraham. This safely coordinates all four transactions in one atomic trigger.}
 \end{figure}
 
 What makes the Whispering Merchants problem hard is that for instance in this example, Abraham initially has no way of obtaining the apple from Dorus, since he has nothing of interest to offer to Dorus. Abraham also has no knowledge of the existence of Chad, and he does not trust Chad.
 
 The LedgerLoops website (https://ledgerloops.com) contains a discussion of various money systems, none of which satisfy the requirement that each participants only trusts their own immediate neighbors.
 
-\section{Crypto-triggers}
-This whitepaper proposes a solution to the Whispering Merchants problem, called LedgerLoops. It is based on cryptographic triggers ('crypto-triggers' for short).
+\section{Hashlocks}
+This whitepaper proposes a solution to the Whispering Merchants problem, called LedgerLoops. It is based on cryptographic triggers ('hashlocks').
 
-A crypto-trigger consists of two parts: a challenge and a solution. The challenge can be included as a condition in contracts. Once the solution has been made public, all contracts are activated.
+A hashlock consists of two parts: a challenge and a solution. The challenge can be included as a condition in contracts. Once the solution has been made public, all contracts are activated.
 
 An IOU (short for "I owe you") is a message or document representing a debt.
-A cryptographically triggered IOU contains the same data as a standard IOU (debtor, beneficiary, asset owed, etc.), plus a cryptographic challenge.
+A hashlocked IOU contains the same data as a standard IOU (debtor, beneficiary, asset owed, etc.), plus a hashlock challenge.
 
-The IOU is without value until the beneficiary presents a valid solution to the challenge. In the current version of the LedgerLoops protocol, the cryptographic challenge is defined by the SHA-256 hash of a random string; the challenge is simply to find the string (or more precisely, {\i a} string) that has the hash value from the challenge. Only the person holding the original string will be able to do this, yet everybody can easily verify and agree if a given candiate solution to the challenge is valid or not. If you know of a better type of challenge scheme than SHA-256, then please comment here:
+The IOU is without value until the beneficiary presents a solution of the hashlock. In the current version of the LedgerLoops protocol, the hashlock challenge is defined by the SHA-256 hash of a random string; the challenge is simply to find the string (or more precisely, {\i a} string) that has the hash value from the challenge. Only the person holding the original string will be able to do this, yet everybody can easily verify and agree if a given candiate solution to the challenge is valid or not.
 
-https://github.com/ledgerloops/ledgerloops-whitepaper/issues/1
+The Whispering Merchants can use hashlocked IOUs as follows to facilitate their trade. One merchant creates a hashlock by picking a 256-bit string at random (the solution, which they keep secret) and calculating its SHA-256 hash value (the challenge, which is included as the condition in hashlocked IOU contracts). The identity of this initiator stays obfuscated. Remember all merchants are willing to give their asset to their clockwise neighbor, but only if they can be sure that their own anti-clockwise neighbor will do the same.
 
-The Whispering Merchants can use cryptographically triggered IOUs as follows to facilitate their trade. One merchant creates a cryptographic challenge. The identity of this initiator stays obfuscated. Remember all merchants are willing to give their asset to their left neighbor, but only if they can be sure that their own right neighbor will do the same.
+The initiator gives a hashlocked IOU to his clockwise neighbor, for the item he wants to offer. Each next clockwise neighbor does the same. The details of the hashlock challenge are reused each time, but the item offered is different in each locally created IOU.
 
-The initiator gives a cryptographically triggered IOU to his left neighbor, for the item he wants to offer. Each next left neighbor does the same. The details of the challenge are reused each time, but the item offered is different in each locally created IOU.
+Once the initiator receives a hashlocked IOU from his own anti-clockwise neighbor, for the item he wants to receive, he presents the solution (now made public for the first time) to his anti-clockwise neighbor. Each next anti-clockwise neighbor now gives the asset they offered in exchange for the solution to the challenge.
 
-Once the initiator receives a cryptographically triggered IOU from his own right neighbor, for the item he wants to receive, he solves the challenge and presents the solution to his right neighbor. Each next right neighbor now gives the asset they offered in exchange for the solution to the challenge.
+Since the challenge used in all hashlocked IOUs was the same one for all trades along the loop, the solution to this challenge acts as a cryptographic trigger, but its meaning is different from the meaning of a cryptographic coin: it represents no value, it only represents a "Go!" signal which all participants recognize. Therefore, LedgerLoops should be considered an alternative to money, rather than an alternative form of money.
 
-Since the challenge used in all cryptographically triggered IOUs was the same one for all trades along the loop, the solution to this challenge acts as a cryptographic trigger, but its meaning is different from the meaning of a cryptographic coin: it represents no value, it only represents a "Go!" signal which all participants recognize. Therefore, LedgerLoops should be considered an alternative to money, rather than an alternative form of money.
-
-\section{The LedgerLoops Protocol (version 0.7)}
-In the last few weeks, I have implemented a few design iterations of the LedgerLoops protocol. Future versions are likely to differ from this, but let me describe roughly how the current version works.
+\section{The LedgerLoops Protocol (version 0.8)}
+In 2016, I have implemented a few design iterations of the LedgerLoops protocol. Future versions are likely to differ from this, but let me describe roughly how the current version works.
 
 \subsection{Peer-to-peer Ledgers}
 As Graeber noted in his book "Debt: the first 5,000 years" ~\cite{Graeber2011}, peer-to-peer debt is useful for (in my words) time-skewed barter between two peers: I give you something now, and you give me something in exchange tomorrow; in the meantime, a debt exists. This is why LedgerLoops is based on peer-to-peer ledgers (that is, ledgers on which two people keep track of what they owe each other).
@@ -262,38 +282,36 @@ Before finding a loop along which assets can move around, the first step of the 
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.7",
-  "msgType": "initiate-ledger-append",
-  "previousHash": "<the ledger head's hash, or null first time>",
-  "hash": "<see below for calculation>",
+  "protocol": "ledgerloops-0.8",
+  "msgType": "ADD",
+  "msgId": <integer>,
   "note": "<a description of why this entry is added>,
-  "debtor": "<identifies debtor; just a nickname>",
-  "addedDebts": {
-    "unit1": amount1, // for instance "USD": 10,
-    "unit2": amount2, // for instance "EUR": -8,
-    ...,
-  },
+  "beneficiary": "<identifies party gaining balance; just a nickname>",
+  "sender": "<usually the other party in the two-peer ledger; just nickname>",
+  "amount": <integer>,
+  "unit": "UCR"
 }
 \end{lstlisting}}
 
-The hash is the SHA-256 hash of the alphabetically sorted UTF-8 JSON representation of the object containing just the previousHash, note, debtor, and addedDebts fields (not the protocol, msgType and hash fields).
+The Unicurn ("UNIversal CUrrency RefereNce" / "UCR") is defined relative to a trade-weighted basket of reference currencies, see https://unicurn.com (I'm still working on defining this).
 
 Even if the communication network is reliable and would detect network outages without losing any messages, a malfunction in the receiver's software could make it look like this message was received successfully when in fact it was not, so to confirm receipt, the recipient replies with:
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.7",
-  "msgType": "confirm-ledger-append",
-  "hash": "<same as in initiate-ledger-append message>",
+  "protocol": "ledgerloops-0.8",
+  "msgType": "ACK",
+  "sender": "<same as in ADD message>",
+  "msgId": "<same as in ADD message>"
 }
 \end{lstlisting}}
 
-As soon as the 'confirm-ledger-append' message has been sent, both peers update their copy of the ledger by appending this one entry.
+As soon as the 'ACK' message has been sent, both peers update their copy of the ledger by appending this one entry.
 So in the current implementation, LedgerLoops coordination is used to create or cancel debts, not directly to trigger the movement of assets. Each participant will be happy if they can exchange one of their incoming debts against one of their outgoing debt, since the balance of each debt will go down, thereby minimizing their exposure to credit risk and enabling new trades to take place. Also, peers can offer goods first, and only if a loop is found, commit to actually owing the delivery of these goods.
 
 \subsection{Routing}
 
-The Whispering Merchants problem is a best-case scenario for using LedgerLoops, since all merchants have exactly one in-neighbor (their right neighbor who offers an asset) and one out-neighbor (their left neighbor, to whom they offer an asset). In a real economy, asset offers could form any directed graph between agents, and agents should first cooperate to detect if any cycles actually exist.
+The Whispering Merchants problem is a best-case scenario for using LedgerLoops, since all merchants have exactly one in-neighbor (their anti-clockwise neighbor who offers an asset) and one out-neighbor (their clockwise neighbor, to whom they offer an asset). In a real economy, asset offers could form any directed graph between agents, and agents should first cooperate to detect if any cycles actually exist.
 
 Finding cycles in a graph of which no one has a bird's eye view is an interesting computer science problem. Recently, 'Distributed Cycle Detection and Removal' ~\cite{Oliva2016} ('DCD') was included in a non-free IEEE publication. Unfortunately, due to the scientific journal's policy, no public version of the algorithm is available yet (you can buy the article from the IEEE website), but I can try to explain it in my own words:
 
@@ -305,148 +323,89 @@ Finding cycles in a graph of which no one has a bird's eye view is an interestin
 
 This algorithm is more decentralized than Rocha-Thatte. Another simple algorithm would be to forward tokens from node to node, along a depth-first search ('DFS'), until a back-edge is found.
 
-I adapted the DCD algorithm algorithm slightly and sort of combined it with DFS to make it work in graphs whose topology can change while the algorithm is running. I called this algorithm 'DDCD-DFS', an implementation in node.js is underway. It works roughly as follows (this is not a complete description yet, as I'm still working out how to deal with each edge case):
+I previously worked on a combination of DCD with DFS, but I now think that DCD's "I am not part of a loop" messages are hard to use in a changing graph where cycles are created and removed often. Instead, I'm now working on a version that uses just DFS whenever an edge is added to the network.
 
-At first, if a node has no neighbors in the debt graph, it is created in deactivated mode.
+\subsection{Hashlocked IOUs}
 
-\begin{itemize}
-\item When a link is added, a routeId is assigned to it.
-\item The node after the link sends a probe message to one of its out-neighbors.
-\item The node that receives this message forwards it to one of its own out-neighbors.
-\item If the probe reaches a node with no out-neighbors, that node sends back a "No" message.
-\item If a "No" message is received, a new probe is started and sent to one of the siblings of the out-neighbor that sent the "No" message. Also, a "Pending" message is sent back to the in-neighbor from which the original probe came.
-\item If a "Pending" message is received, it is propagated back to the in-neighbor from which the original probe came.
-\item If the node that started the probe receives a "Pending" message, it marks that out-neighbor as pending, and notes down the timestamp.
-\item If a known routeId is received from an in-neighbor, that's a cycle.
-\end{itemize}
-
-A node can send "No" messages in error or while lying on purpose - when this happens, this messages more precisely means "I'm not on a cycle of nodes that cooperate correctly". A "Pending" message sent in error or maliciously is not semantically incorrect in its meaning, because it just means a cycle "might" exist. It could distract nodes from real cycles, but it would be up to the first non-malicious and non-malfunctioning node to distrust, deprioritize, or unfriend a neighbor who sends a lot of distracting messages. This is an area for further research.
-
-The message formats exchanged are as follows. For sending the probes:
-\vbox{\begin{lstlisting}
-{
-  "protocol": "ddcd-dfs-0.3",
-  "msgType": "probe",
-  "routeId": "<a long unique string>",
-}
-\end{lstlisting}}
-
-For replying "No":
+The initiator generates a random string and calculates its SHA-256 hash value. It then sends the following message to an out-neighbor:
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ddcd-dfs-0.3",
-  "msgType": "not-routable",
-  "routeId": "<string from the probe message>",
+  "protocol": "ledgerloops-0.8",
+  "msgType": "COND",
+  "msgId": <integer>,
+  "condition": <256 bits in a lower-case hex string>,
+  "note": "<a description of why this entry is added>,
+  "beneficiary": "<identifies party gaining balance; just a nickname>",
+  "sender": "<usually the other party in the two-peer ledger; just nickname>",
+  "amount": <integer>,
+  "unit": "UCR"
 }
 \end{lstlisting}}
-
-For replying "Pending":
-
-\vbox{\begin{lstlisting}
-{
-  "protocol": "ddcd-dfs-0.3",
-  "msgType": "still-pending",
-  "routeId": "<string from the probe message>",
-}
-\end{lstlisting}}
-
-The "Pending" messages may need to be repeated periodically, to deal with nodes that are not always connected.
-
-\subsection{Cryptographically triggered IOUs}
-
-The initiator generates a random string and calculates its SHA-256 hash value. It then sends the following message to the out-neighbor to which it sent the routeId that looped around:
-
-\vbox{\begin{lstlisting}
-{
-  "protocol": "ledgerloops-0.7",
-  "msgType": "debt-definition",
-  "id": "<long string, referred to in subsequent messages>",
-  "unit": "currency, service or asset",
-  "amount": "<number of units offered>",
-}
-\end{lstlisting}}
-
-\vbox{\begin{lstlisting}
-{
-  "protocol": "ledgerloops-0.7",
-  "msgType": "conditional-promise",
-  "id": "<long string, referred to in subsequent messages>",
-  "debtId": "<id from debt-definition>",
-  "valueEstimate": {
-    "unit": "UCR",
-    "amount": "<number of unicurns estimated value of the offer>",
-  },
-  "challenge": {
-    "type": "hash-challenge",
-    "function": "sha-256",
-    "hash": "<hash value in hex format>",
-  },
-  "routeId": "<from routing phase>",
-}
-\end{lstlisting}}
-
-The Unicurn ("UNIversal CUrrency RefereNce" / "UCR") is defined relative to a trade-weighted basket of reference currencies, see https://unicurn.com (I'm still working on defining this).
 
 Note that a sender can offer parts of a specific asset, even if the asset is a physical item that cannot be split into parts.
 For instance, I could send you 10 IOUs, each referring to the blue bicycle I showed you as the "unit", and each for an amount of 0.1.
-It is important to use each debt-definition only once, so that it is clear which IOU is being triggered, and this is also tracked
+It is important to use each hashlock only once, so that it is clear which IOU is being triggered, and this is also tracked
 correctly in our peer-to-peer ledger afterwards. As soon as I owe you 10 times one tenth of the blue bicycle, you can claim the
 entire bicycle. You could also claim the bicycle after I owe you only 8 tenths of it, after which you would owe me the equivalent
 of 2 tenths of the blue bicycle. This requires a more long-term form of trust between us than one-off trades of entire assets or
 fungeable assets. Another option would be to value the blue bicycle in terms of a more common unit of value (for instance a standard
 government-issued currency, a crypto-currency, a rare metal, or kiloWatt-hours of energy). This could simplify our peer-to-peer ledger.
-For the conditional-promise I send you, it only matters that we agree on what the unit of value refers to, and unlike currencies which are
+For the conditional promise I send you, it only matters that we agree on what the unit of value refers to, and unlike currencies which are
 used as money, this unit of value does not need to have any meaning to anyone apart from the two peers who discuss it.
 
-Each participant reuses the 'challenge' part of the con\-di\-tio\-nal-pro\-mise they receive, and creates a new conditional promise, mentioning
-a different debtId, depending on the asset they want to offer their peer in this cryptographically triggered IOU. The valueEstimate should be
-the same though, because the initiator will not be willing to trigger the loop if the valueEstimate was decreased along the way.
+Each participant reuses the 'condition' part of the con\-di\-tio\-nal pro\-mise they receive, and creates their own outgoing hashlocked IOU. The amount and unit should be roughly the same, so that when the forwarded COND message loops around to the initiator, the value is still roughly the same and the initiator will decide to publish the hashlock's solution. See the section about "Multi-lateral netting at equilibrium" below for a more precise discussion of exchange rate setting.
 
-For now, the Unicurn is the only unit of value allowed for value estimates in conditional-promise messages.
+For now, the Unicurn is the only unit of value allowed for value estimates in COND messages.
 
-Once a conditional-promise message reaches the initiator, describing the unit of value the initiator desires, and promising an amount which the initiator finds acceptable compared to the amount of asset he offered when starting the loop, trade becomes possible. The initiator confirms that the incoming conditional-promise message uses the same challenge
-details which he created, he solves the challenge, and the solution to the challenge is sent round in the opposite direction:
+Once a conditional promise message reaches the initiator, describing the unit of value the initiator desires, and promising an amount which the initiator finds acceptable compared to the amount of asset he offered when starting the loop, trade becomes possible. The initiator confirms that the incoming conditional promise message uses the same challenge
+details which he created, and the solution to the challenge is sent round in the opposite direction:
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.7",
-  "msgType": "satisfy-condition",
-  "conditionalPromiseId": "<id from conditional-promise>",
-  "solution": "<original random string in base64 format>",
+  "protocol": "ledgerloops-0.8",
+  "msgType": "FULFILL",
+  "sender": "<sender of COND message>",
+  "msgId": "<same id as COND message>",
+  "preimage": "<original random string in lowercase hex format>",
 }
 \end{lstlisting}}
 
+The receiver of a FULFILL message converts the solution field from its hex string representation, calculates the SHA-256 hash value of the resulting raw bytes, and converts the hash value back to lowercase hex representation. If the result matches the hash value from the challenge, the solution has been verified to be correct. The receiver replies with the "ACK"
+message format from earlier (using the msgId from the "FULFILL" message) to confirm to the sender that the solution has been accepted, and the receiver agrees with the resulting update of their peer-to-peer ledger. The receiver has now lost the asset from their own earlier conditional promise, but has gained knowledge of the solution to the challenge used in all conditional promise messages sent earlier. He uses the solution to create his own FULFILL message and claim the asset that was conditionally promised to him by his other neighbor in the loop. Once all nodes along the loop have done this, the trade is complete.
 
-The receiver of a satisfy-condition message converts the solution field from its base64 representation, calculates the SHA-256 hash value of the resulting raw bytes, and converts the hash value back to base64 representation. If the result matches the hash value from the challenge, the solution has been verified to be correct. The receiver replies with the "confirm-update"
-message format from earlier (using the transactionId from the "satisfy-condition" message) to confirm to the sender that the solution has been accepted, and the receiver agrees with the resulting update of their peer-to-peer ledger. The receiver has now lost the asset from their own earlier conditional-promise message, but has gained knowledge of the solution to the challenge used in all conditional-promise messages sent earlier. He uses the solution to create his own satisfy-condition message and claim the asset that was conditionally promised to him by his other neighbor in the loop. Once all nodes along the loop have done this, the trade is complete.
+Just like an ADD message, FULFILL message should be responded to with an ACK message in order to commit the proposed new entry to the peer-to-peer ledger on both sides.
 
-If a node decides it has been waiting for too long, it can request a revokation of the cryptographically triggered IOU they sent earlier,
+If a node decides it has been waiting for too long, it can request a revokation of the hashlocked IOU they sent earlier,
 by sending this messages behind it:
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.7",
-  "msgType": "please-reject",
-  "conditionalPromiseId": "<id from conditional-promise>",
+  "protocol": "ledgerloops-0.8",
+  "msgType": "PLEASE-FINALIZE",
+  "sender": "<sender of the COND message and also of this message>",
+  "msgId": "<same id as the COND message>"
 }
 \end{lstlisting}}
 
 A node should probably wait a few milliseconds before forwarding a cryptographically triggered IOU, in case the IOU has been buffered in
-a slow place for a while, and now has a "please-reject" message following directly behind it.
+a slow place for a while, and now has a "PLEASE-FINALIZE" message following directly behind it.
 
-To reject the cryptographically-triggered IOU you received earlier, use this message:
+To reject a hashlocked IOU you received earlier, use this message:
 
 \vbox{\begin{lstlisting}
 {
-  "protocol": "ledgerloops-0.7",
-  "msgType": "reject",
-  "conditionalPromiseId": "<id from conditional-promise>",
+  "protocol": "ledgerloops-0.8",
+  "msgType": "REJECT",
+  "sender": "<sender of the COND message>",
+  "msgId": "<same id as the COND message>"
+  "reason": "human-readable free text",
 }
 \end{lstlisting}}
 
+The rejection will only be valid if it is sent by the recipient of the COND message in question.
 
-The rejection will only be valid if it is sent by the recipient of the conditional-promise message in question.
+A REJECT message can also be used to reject an ADD or FULFILL message. So the message flows are: (1) ADD-ACK, (2) ADD-REJECT, (3) COND-[PLEASE-FINALIZE]*-FULFILL-ACK, (4) COND-[PLEASE-FINALIZE]*-FULFILL-REJECT, (4) COND-[PLEASE-FINALIZE]*-REJECT. Messages can be repeated to guarantee eventual agreement over a ledger entry (a ledger entry is uniquely defined by its sender and msgId).
 
 \section{Security Discussion}
 \subsection{Assessment Scope}
@@ -561,7 +520,7 @@ Users should not rely on their LedgerLoops app as the only record of their credi
 \section{Roadmap}
 The current version of the LedgerLoops protocol still lacks a few features. 
 
-A LedgerLoops app could allow the user to define minimal exchange rates for pairs of assets the neighbor owes and is owed. The danger in this is that every candidate participant in a loop would try to make a profit, and the asset which the initiator is offered by their right neighbor would be worth much less than the asset the initiator offered for trade in the beginning. This brings the candidate participants into a sort of prisoner's dilemma: they should all try to make reasonable trade offers, otherwise no agreement will be reached, and nobody can trade. On the other hand, when agreement is reached, each participant could feel like they might have been able to negotiate a better deal if they would have negotiated a bit harder. This is a reality in all economic trade, but allowing it to occur in LedgerLoops negotiations will probably require more messages to be passed before a participants agree on a loop, and these extra messages may expose more information about each participant than in the current version of the protocol.
+A LedgerLoops app could allow the user to define minimal exchange rates for pairs of assets the neighbor owes and is owed. The danger in this is that every candidate participant in a loop would try to make a profit, and the asset which the initiator is offered by their anti-clockwise neighbor would be worth much less than the asset the initiator offered for trade in the beginning. This brings the candidate participants into a sort of prisoner's dilemma: they should all try to make reasonable trade offers, otherwise no agreement will be reached, and nobody can trade. On the other hand, when agreement is reached, each participant could feel like they might have been able to negotiate a better deal if they would have negotiated a bit harder. This is a reality in all economic trade, but allowing it to occur in LedgerLoops negotiations will probably require more messages to be passed before a participants agree on a loop, and these extra messages may expose more information about each participant than in the current version of the protocol.
 
 Finally, the current version of the protocol is limited to each participant trading part of one of their credits against part of one of their debts. In practice, it may be attractive for a user to exchange a partial reduction of debt at one creditor against an increase of debt at another creditor, or to exchange an increase of credit at one debtor for a decrease of credit at another debtor. This would require a change in the routing algorithm, since this makes every debtor and every creditor both a potential in-neighbor and a potential out-neighbor. The app would then probably allow users to indicate in more detail which creditors and which debtors they prefer over others (for instance, a user would typically prefer to have a credit at a neighbor they trust more, or with whom they have closer or more frequent real-world contact).
 
@@ -580,9 +539,9 @@ Without the use of LedgerLoops, trade can only be facilited, and value can only 
 Such trust in a (by itself worthless) token is often based on hype (hoping a certain crypto-currency will stay popular), or on war (politicians will generally send their soldiers to war to defend a government-issued currency when the power of the government is at risk), or on citizen-paid taxes (often used to bail out failing banks). LedgerLoops avoids this reliance on globally defined tokens, which makes it a much more decentralized technology. Any group of people can start to use the LedgerLoops protocol within their community, without relying on the health of a globally defined currency or on the health of a global network. If a hype of activity in LedgerLoops transaction rises and falls in some local geographic area, this has very little effect on the ability of people in another geographic area to use the LedgerLoops protocol. That being said, of course, communities would benefit from connecting with another community, and this would automatically happen if a few users form part of both communities. This network effect is very similar to how the internet works ("Connectivity is its own Reward").
 
 \subsection{Starting to use LedgerLoops}
-First of all, let me state that version 0.7 of LedgerLoops should be considered a developer preview, and further development will most likely be needed before the protocol is production-ready. Until we gain a better understanding of the network dynamics in more complex topologies, its use is only recommended for academic experiments, not for real-world trade. Users are advised to only trade very small assets, for instance up to 1 USD, since we can't yet predict what dynamics would arise, and what other security considerations may be discovered during such initial experiments.
+First of all, let me state that version 0.8 of LedgerLoops should be considered a developer preview, and further development will most likely be needed before the protocol is production-ready. Until we gain a better understanding of the network dynamics in more complex topologies, its use is only recommended for academic experiments, not for real-world trade. Users are advised to only trade very small assets, for instance up to 1 USD, since we can't yet predict what dynamics would arise, and what other security considerations may be discovered during such initial experiments.
 
-Also, the current version of the software used on the demo page is not recommended for production; I probably need to rewrite it from scratch, using what I learned in the last few weeks developing this version 0.7 of LedgerLoops. Importantly, the code has also not been reviewed by a security expert yet, so it's not unlikely that this implementation contains a few vulnerabilities; in short, please only use it to run simulations, don't entrust it with data about your real-world trade peers yet.
+Also, the current version of the software used on the demo page is not recommended for production; I probably need to rewrite it from scratch, using what I learned in the last few weeks developing this version 0.8 of LedgerLoops. Importantly, the code has also not been reviewed by a security expert yet, so it's not unlikely that this implementation contains a few vulnerabilities; in short, please only use it to run simulations, don't entrust it with data about your real-world trade peers yet.
 
 One path to start using LedgerLoops in the real world, would be to develop an Android app which can access a smartphone's addressbook, and use the API of an existing end-to-end encrypted messaging platform for delivering the LedgerLoops messages to the user's neighbors. This would require a potential user to convince their real-world trade peers to install the same app, which would be impractical for casual one-time trade peers, but could work well for, for instance, people who share a house, or for the members of a sports club (where the administration of membership fees could be a driving use case).
 
