@@ -285,9 +285,8 @@ Before finding a loop along which assets can move around, the first step of the 
   "protocol": "ledgerloops-0.8",
   "msgType": "ADD",
   "msgId": <integer>,
-  "note": "<a description of why this entry is added>,
-  "beneficiary": "<identifies party gaining balance; just a nickname>",
-  "sender": "<usually the other party in the two-peer ledger; just nickname>",
+  "note": "<a description of why this entry is added>, (optional)
+  "beneficiary": "you" or "me",
   "amount": <integer>,
   "unit": "UCR"
 }
@@ -301,7 +300,6 @@ Even if the communication network is reliable and would detect network outages w
 {
   "protocol": "ledgerloops-0.8",
   "msgType": "ACK",
-  "sender": "<same as in ADD message>",
   "msgId": "<same as in ADD message>"
 }
 \end{lstlisting}}
@@ -335,6 +333,7 @@ Agents will generally be able to define a partial ordering on their list of neig
 An agent can create a probe from scratch, by generating a random 16-byte string, and sending it as a C-wise probe to F, and also as an F-wise probe to C.
 
 The format for a PROBES message is as follows:
+
 \vbox{\begin{lstlisting}
 {
   "protocol": "ledgerloops-0.8",
@@ -364,11 +363,10 @@ The initiator generates a random string and calculates its SHA-256 hash value. I
   "msgType": "COND",
   "msgId": <integer>,
   "condition": <256 bits in a lower-case hex string>,
-  "note": "<a description of why this entry is added>,
-  "beneficiary": "<identifies party gaining balance; just a nickname>",
-  "sender": "<usually the other party in the two-peer ledger; just nickname>",
+  "beneficiary": "you" or "me",
   "amount": <integer>,
-  "unit": "UCR"
+  "unit": "UCR",
+  "note": "<a description of why this entry is added>" (optional)
 }
 \end{lstlisting}}
 
@@ -396,7 +394,7 @@ details which he created, and the solution to the challenge is sent round in the
   "msgType": "FULFILL",
   "sender": "<sender of COND message>",
   "msgId": "<same id as COND message>",
-  "preimage": "<original random string in lowercase hex format>",
+  "preimage": "<original random string in lower-case hex format>",
 }
 \end{lstlisting}}
 
